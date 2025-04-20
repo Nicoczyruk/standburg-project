@@ -4,6 +4,12 @@ const express = require('express');
 const cors = require('cors');
 const db = require('./db/connection'); // Importa el módulo de conexión
 
+// IMPORTAR RUTAS
+const categoriaRoutes = require('./routes/categoria.routes');
+const productoRoutes = require('./routes/producto.routes');
+const mesaRoutes = require('./routes/mesa.routes');
+const pedidoRoutes = require('./routes/pedido.routes');
+
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -17,9 +23,11 @@ app.get('/', (req, res) => {
     res.json({ message: 'API Standburg - Servidor funcionando!' });
 });
 
-// --- AQUÍ irán las rutas más adelante ---
-// 
-//
+// ---  ROUTES ---
+app.use('/api/categorias', categoriaRoutes);
+app.use('/api/productos', productoRoutes);
+app.use('/api/mesas', mesaRoutes);
+app.use('/api/pedidos', pedidoRoutes);
 
 // --- Middleware de Manejo de Errores (dejarlo para el futuro) ---
 app.use((err, req, res, next) => {

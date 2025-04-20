@@ -1,11 +1,13 @@
 // server/db/connection.js
+require('dotenv').config();
 const sql = require('mssql');
 
+// Configuración de la conexión leída desde .env
 const dbConfig = {
-    server: process.env.DB_SERVER,
-    database: process.env.DB_DATABASE,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
+    server: process.env.DB_SERVER, // ej. localhost, localhost\SQLEXPRESS, server.database.windows.net
+    database: process.env.DB_DATABASE,
     port: parseInt(process.env.DB_PORT || '1433', 10),
     pool: {
         max: parseInt(process.env.DB_POOL_MAX || '10', 10),
@@ -13,107 +15,132 @@ const dbConfig = {
         idleTimeoutMillis: parseInt(process.env.DB_POOL_IDLE_TIMEOUT || '30000', 10)
     },
     options: {
-        // Lee DB_ENCRYPT de .env, por defecto 'true' si no se especifica para mantener compatibilidad Azure
-        encrypt: process.env.DB_ENCRYPT ? process.env.DB_ENCRYPT === 'true' : true,
-        // Lee DB_TRUST_CERT de .env; si no está, usa NODE_ENV como antes
+        encrypt: process.env.DB_ENCRYPT ? process.env.DB_ENCRYPT === 'true' : true, // Default true for security (Azure)
         trustServerCertificate: process.env.DB_TRUST_CERT
             ? process.env.DB_TRUST_CERT === 'true'
-            : process.env.NODE_ENV === 'development'
+            : process.env.NODE_ENV === 'development' // Confiar en local si es desarrollo
     }
 };
 
-let pool = null; // Variable para guardar el pool de conexión
+let pool = null; // Variable para mantener el pool de conexiones
 
 /**
- * Establece el pool de conexión global.
- * Llama a esta función una vez al iniciar el servidor.
+ * Establece el pool de conexiones global.
  */
 const connect = async () => {
-    if (pool) return pool; // Si ya existe, no crea uno nuevo
+    if (pool) return pool; // Si ya existe, no reconectar
+
     try {
-        console.log(`Intentando conectar a SQL Server en ${dbConfig.server}...`);
-        pool = await sql.connect(dbConfig);
+        pool = await new sql.ConnectionPool(dbConfig).connect();
         console.log('Pool de conexión SQL Server establecido exitosamente.');
+
         pool.on('error', err => {
-            console.error('Error en el pool de conexión SQL Server:', err);
-            // Aquí podrías añadir lógica para intentar reconectar si es necesario
+            console.error('Error en el Pool de SQL Server:', err);
+            // Intentar reconectar o manejar el error como sea apropiado
+            pool = null; // Marcar como nulo para intentar reconectar en la próxima query
         });
+
         return pool;
     } catch (err) {
         console.error('Error al conectar con SQL Server:', err);
-        pool = null; // Resetea el pool si falla la conexión
-        throw err; // Propaga el error para detener el inicio si es crítico
+        pool = null; // Asegurarse que pool sea nulo si falla la conexión inicial
+        throw err; // Relanzar para manejo en startServer
     }
 };
 
 /**
- * Cierra el pool de conexión global.
- * Llama a esta función cuando el servidor se apague.
+ * Cierra el pool de conexiones.
  */
 const close = async () => {
     if (pool) {
-        try {
-            await pool.close();
-            pool = null;
-            console.log('Pool de conexión SQL Server cerrado.');
-        } catch (err) {
-            console.error('Error cerrando el pool de conexión SQL Server:', err);
-            pool = null;
-        }
+        await pool.close();
+        pool = null;
+        console.log('Pool de conexión SQL Server cerrado.');
     }
 };
 
 /**
- * Obtiene el pool de conexión. Lanza un error si no está inicializado.
- * Las funciones de query usarán esto.
- */
-const getPool = () => {
-    if (!pool) {
-        throw new Error('Pool de conexión no inicializado. Asegúrate de llamar a connect() al inicio.');
-    }
-    return pool;
-};
-
-/**
- * Función helper para ejecutar queries de forma segura usando el pool.
- * @param {string} queryText - La consulta SQL con parámetros (@paramName).
- * @param {object} [params={}] - Objeto con los parámetros { paramName: value }.
+ * Ejecuta una consulta SQL usando el pool o una transacción existente.
+ * @param {string} sqlQuery La consulta SQL a ejecutar.
+ * @param {object} [params={}] Parámetros para la consulta (ej. { id: { type: sql.Int, value: 1 } }).
+ * @param {sql.Transaction} [transaction=null] La transacción activa, si existe.
  * @returns {Promise<sql.IResult<any>>} El resultado de la consulta.
  */
-const query = async (queryText, params = {}) => {
-    const currentPool = getPool(); // Obtiene el pool (o lanza error si no existe)
+const query = async (sqlQuery, params = {}, transaction = null) => {
+    if (!pool && !transaction) await connect(); // Asegurar que el pool existe si no hay transacción
+
+    // Determinar si usar el pool o la transacción
+    const requestProvider = transaction ? transaction.request() : pool.request();
+
     try {
-        const request = currentPool.request();
-        // Añadir parámetros de forma segura
+        // Añadir parámetros a la solicitud
         for (const key in params) {
             if (Object.hasOwnProperty.call(params, key)) {
-                // Intenta detectar el tipo 
-                let sqlType;
-                const value = params[key];
-                if (typeof value === 'number' && Number.isInteger(value)) sqlType = sql.Int;
-                else if (typeof value === 'number') sqlType = sql.Float;
-                else if (typeof value === 'boolean') sqlType = sql.Bit;
-                else if (value instanceof Date) sqlType = sql.DateTime;
-                else sqlType = sql.NVarChar; // Por defecto para strings y otros
-
-                request.input(key, sqlType, value);
+                // Asegurarse que el valor no sea undefined, convertir a null si es necesario
+                const paramValue = params[key].value === undefined ? null : params[key].value;
+                requestProvider.input(key, params[key].type, paramValue);
             }
         }
-        // Ejecuta la query
-        const result = await request.query(queryText);
-        return result; // Contiene .recordset, .rowsAffected, etc.
+        // Ejecutar la consulta
+        const result = await requestProvider.query(sqlQuery);
+        return result;
     } catch (err) {
-        console.error('Error ejecutando query:', { queryText });
-        console.error(err);
-        throw err; // Relanza el error para manejo superior
+        // Log detallado del error
+        console.error('Error SQL:', err.message);
+        console.error('Query:', sqlQuery.substring(0, 200) + (sqlQuery.length > 200 ? '...' : ''));
+        if (Object.keys(params).length > 0) {
+            console.error('Params:', JSON.stringify(params));
+        }
+        throw err; // Relanzar el error para manejo superior
     }
 };
 
-// Exportamos las funciones necesarias
+
+/**
+ * Inicia una nueva transacción.
+ * @returns {Promise<sql.Transaction>} La transacción iniciada.
+ */
+const getTransaction = async () => {
+    if (!pool) await connect();
+    const transaction = new sql.Transaction(pool);
+    await transaction.begin();
+    return transaction;
+};
+
+/**
+ * Confirma (commit) una transacción.
+ * @param {sql.Transaction} transaction La transacción a confirmar.
+ */
+const commitTransaction = async (transaction) => {
+    try {
+        await transaction.commit();
+    } catch (err) {
+        console.error('Error al hacer commit de la transacción:', err);
+        // Intentar rollback por si acaso
+        try { await transaction.rollback(); } catch (rbErr) { console.error('Error en rollback después de commit fallido:', rbErr); }
+        throw err;
+    }
+};
+
+/**
+ * Deshace (rollback) una transacción.
+ * @param {sql.Transaction} transaction La transacción a deshacer.
+ */
+const rollbackTransaction = async (transaction) => {
+    try {
+        await transaction.rollback();
+    } catch (err) {
+        console.error('Error al hacer rollback de la transacción:', err);
+        throw err;
+    }
+};
+
 module.exports = {
-    connect, // Para iniciar la conexión desde server.js
-    close,   // Para cerrar la conexión desde server.js
-    getPool, // Para obtener el pool si se necesita directamente (ej. transacciones)
-    query,   // Helper para ejecutar queries desde los archivos *.queries.js
-    sql      // Para acceder a los tipos de datos (sql.Int, etc.) en los archivos *.queries.js
+    connect,
+    close,
+    query, // Exportamos la función query general
+    getTransaction,
+    commitTransaction,
+    rollbackTransaction,
+    sql // Exportar sql para usar los tipos (sql.Int, sql.VarChar, etc.)
 };
