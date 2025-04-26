@@ -1,7 +1,7 @@
 // server/controllers/producto.controller.js
 const productoQueries = require('../db/queries/producto.queries');
 
-// Obtener todos los productos (opcionalmente filtrados por categoría vía query param)
+// Obtener todos los productos (opcionalmente filtrados por categoría vía query param, VER QUERY)
 const obtenerTodosLosProductos = async (req, res, next) => {
     const { categoria_id } = req.query; // Obtener el filtro de la query string ?categoria_id=X
     let categoriaIdInt = null;
@@ -58,7 +58,7 @@ const obtenerProductosPorCategoria = async (req, res, next) => {
         // }
 
         const productos = await productoQueries.getProductosByCategoriaId(categoriaIdInt);
-        // Es normal que una categoría no tenga productos, devolver array vacío
+        // Es normal que una categoría no tenga productos, devolver array vacío como respuesta MANEJAR
         res.json(productos || []);
     } catch (error) {
         next(error);
@@ -173,7 +173,7 @@ const eliminarProducto = async (req, res, next) => {
 module.exports = {
     obtenerTodosLosProductos,
     obtenerProductoPorId,
-    obtenerProductosPorCategoria, // Exportar para la ruta opcional
+    obtenerProductosPorCategoria, 
     crearProducto,
     actualizarProducto,
     eliminarProducto,

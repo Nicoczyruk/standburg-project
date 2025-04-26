@@ -77,7 +77,6 @@ const updateCategoria = async (id, nombre, descripcion) => {
 
 /**
  * Elimina una categoría por su ID.
- * Considera implementar Soft Delete (marcar como inactivo) en lugar de borrado físico.
  * @param {number} id El ID de la categoría a eliminar.
  */
 const deleteCategoria = async (id) => {

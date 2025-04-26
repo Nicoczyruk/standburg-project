@@ -18,7 +18,7 @@ router.get('/:id', mesaController.obtenerMesaPorId);
 router.post('/', /* authMiddleware.isAdmin, */ mesaController.crearMesa);
 
 // PUT /api/mesas/:id -> Actualizar una mesa existente (incluyendo estado)
-// TODO: Proteger esta ruta (quizás diferentes niveles: admin para nro/cap, mesero para estado?)
+// TODO: Proteger esta ruta 
 router.put('/:id', /* authMiddleware.isAdmin, */ mesaController.actualizarMesa);
 
 // DELETE /api/mesas/:id -> Eliminar una mesa existente

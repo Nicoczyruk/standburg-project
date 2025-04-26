@@ -102,8 +102,6 @@ const updateMesa = async (id, { numero_mesa, capacidad, estado }) => {
 
 /**
  * Elimina una mesa por su ID.
- * Nota: La FK en PEDIDOS tiene ON DELETE SET NULL, por lo que borrar la mesa
- * dejará pedidos existentes sin mesa_id. Considerar si esto es deseable.
  * @param {number} id - El ID de la mesa a eliminar.
  */
 const deleteMesa = async (id) => {
