@@ -53,8 +53,7 @@ const obtenerPedidoPorId = async (req, res, next) => {
 
 // Crear un nuevo pedido
 const crearPedido = async (req, res, next) => {
-    // Asumimos que admin_id vendrá del usuario autenticado (req.user.admin_id)
-    // Por ahora, lo tomamos del body o lo dejamos null si no viene
+    
     const { mesa_id, admin_id, items } = req.body;
 
     // Validación básica de entrada
@@ -121,10 +120,10 @@ const actualizarEstadoPedido = async (req, res, next) => {
         // Opcionalmente, devolver el pedido completo después de actualizar el estado
         const pedidoCompleto = await pedidoQueries.getPedidoById(pedidoIdInt);
         res.json(pedidoCompleto);
-        // O simplemente devolver el estado actualizado:
+        // O simplemente devolver el estado actualizado PARA TESTEAR:
         // res.json(pedidoActualizado);
     } catch (error) {
-        // Si el error viene de la query por CHECK constraint (aunque validamos antes)
+        // Si el error viene de la query por CHECK constraint 
         if (error.message.includes('no es válido')) {
              return res.status(400).json({ message: error.message }); // 400 Bad Request
         }

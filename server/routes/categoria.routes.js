@@ -6,7 +6,7 @@ const productoController = require('../controllers/producto.controller');
 
 const router = express.Router();
 
-// --- Rutas Públicas (o que podrían serlo) ---
+// --- Rutas Públicas ---
 // GET /api/categorias -> Obtener todas las categorías
 router.get('/', categoriaController.obtenerTodasLasCategorias);
 
