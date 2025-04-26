@@ -5,7 +5,7 @@ const pedidoController = require('../controllers/pedido.controller');
 
 const router = express.Router();
 
-// --- Rutas (probablemente todas protegidas) ---
+// --- Rutas  ---
 
 // GET /api/pedidos -> Listar pedidos (con filtros opcionales)
 // TODO: Proteger esta ruta
@@ -20,7 +20,7 @@ router.get('/:id', /* authMiddleware.isLoggedIn, */ pedidoController.obtenerPedi
 router.post('/', /* authMiddleware.isLoggedIn, */ pedidoController.crearPedido);
 
 // PUT /api/pedidos/:id/estado -> Actualizar el estado de un pedido
-// TODO: Proteger esta ruta (quizás roles específicos?)
+// TODO: Proteger esta ruta 
 router.put('/:id/estado', /* authMiddleware.isLoggedIn, */ pedidoController.actualizarEstadoPedido);
 
 module.exports = router;

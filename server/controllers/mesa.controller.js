@@ -51,7 +51,7 @@ const crearMesa = async (req, res, next) => {
 
     const mesaData = {
         numero_mesa: parseInt(numero_mesa),
-        // Incluir capacidad y estado solo si fueron proporcionados, para usar defaults de DB si no
+        // Incluir capacidad y estado solo si fueron proporcionados, para usar defaults de DB
         ...(capacidad !== undefined && { capacidad: parseInt(capacidad) }),
         ...(estado !== undefined && { estado: estado })
     };
@@ -64,7 +64,7 @@ const crearMesa = async (req, res, next) => {
         if (error.message.includes('ya existe')) {
             return res.status(409).json({ message: error.message }); // 409 Conflict
         }
-        // Si el error viene de la query por CHECK constraint (aunque validamos antes)
+        // Si el error viene de la query por CHECK constraint 
         if (error.message.includes('no es válido')) {
              return res.status(400).json({ message: error.message }); // 400 Bad Request
         }
@@ -101,7 +101,7 @@ const actualizarMesa = async (req, res, next) => {
     };
 
     try {
-        // Opcional: verificar si la mesa existe antes de intentar actualizar
+        // POR VER: verificar si la mesa existe antes de intentar actualizar
         // const mesaExistente = await mesaQueries.getMesaById(mesaIdInt);
         // if (!mesaExistente) {
         //     return res.status(404).json({ message: `Mesa con ID ${id} no encontrada.` });
@@ -118,7 +118,7 @@ const actualizarMesa = async (req, res, next) => {
         if (error.message.includes('ya existe')) {
             return res.status(409).json({ message: error.message }); // 409 Conflict
         }
-         // Si el error viene de la query por CHECK constraint (aunque validamos antes)
+         // Si el error viene de la query por CHECK constraint 
         if (error.message.includes('no es válido')) {
              return res.status(400).json({ message: error.message }); // 400 Bad Request
         }

@@ -5,7 +5,7 @@ const categoriaQueries = require('../db/queries/categoria.queries');
 const obtenerTodasLasCategorias = async (req, res, next) => {
     try {
         const categorias = await categoriaQueries.getAllCategorias();
-        // Es normal que la lista esté vacía si no hay categorías, no es un error 404
+        // Es normal que la lista esté vacía si no hay categorías, no es un error 404 ya lo comprobe
         res.json(categorias || []);
     } catch (error) {
         next(error); // Pasa el error al manejador global
@@ -36,7 +36,7 @@ const crearCategoria = async (req, res, next) => {
     const { nombre, descripcion } = req.body;
 
     // Validación básica (el nombre es obligatorio)
-    // TODO: Añadir validación más robusta (ej. con express-validator)
+    // TODO: Añadir validación más robusta 
     if (!nombre || typeof nombre !== 'string' || nombre.trim() === '') {
         return res.status(400).json({ message: 'El campo "nombre" es obligatorio.' });
     }
@@ -91,7 +91,7 @@ const eliminarCategoria = async (req, res, next) => {
             // Si no se eliminó nada, es porque no se encontró ese ID
             return res.status(404).json({ message: `Categoría con ID ${id} no encontrada.` });
         }
-        res.status(204).send(); // 204 No Content (éxito sin cuerpo de respuesta)
+        res.status(204).send(); // 204 No Content 
     } catch (error) {
          // Si el error viene de la query por FK constraint
         if (error.message.includes('productos asociados')) {

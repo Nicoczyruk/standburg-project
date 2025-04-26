@@ -164,7 +164,7 @@ const deleteProducto = async (id) => {
 module.exports = {
     getAllProductos,
     getProductoById,
-    getProductosByCategoriaId, // Para la ruta opcional
+    getProductosByCategoriaId, 
     createProducto,
     updateProducto,
     deleteProducto,
