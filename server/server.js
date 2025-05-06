@@ -4,10 +4,18 @@ const express = require('express');
 const cors = require('cors');
 const db = require('./db/connection'); // Importa el módulo de conexión
 
+// IMPORTAR RUTAS
+const categoriaRoutes = require('./routes/categoria.routes');
+const productoRoutes = require('./routes/producto.routes');
+const mesaRoutes = require('./routes/mesa.routes');
+const pedidoRoutes = require('./routes/pedido.routes');
+const pagoRoutes = require('./routes/pago.routes');
+const turnoRoutes = require('./routes/turno.routes');
+
 const app = express();
 const port = process.env.PORT || 5000;
 
-// --- Middlewares básicos (puedes mantenerlos) ---
+// --- Middlewares básicos ---
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -17,11 +25,16 @@ app.get('/', (req, res) => {
     res.json({ message: 'API Standburg - Servidor funcionando!' });
 });
 
-// --- AQUÍ irán las rutas más adelante ---
-// 
-//
+// ---  ROUTES ---
+app.use('/api/categorias', categoriaRoutes);
+app.use('/api/productos', productoRoutes);
+app.use('/api/mesas', mesaRoutes);
+app.use('/api/pedidos', pedidoRoutes);
+app.use('/api/pagos', pagoRoutes);
+app.use('/api/turnos', turnoRoutes);
 
-// --- Middleware de Manejo de Errores (dejarlo para el futuro) ---
+
+// --- Middleware de Manejo de Errores  ---
 app.use((err, req, res, next) => {
     console.error('Error no controlado:', err);
     const statusCode = err.status || 500;
@@ -44,7 +57,7 @@ const startServer = async () => {
         });
 
     } catch (err) {
-        // Si db.connect() falla, el error se captura aquí
+        // Si db.connect() falla, el error se captura aca
         console.error('FALLO CRÍTICO: No se pudo conectar a la base de datos al iniciar.', err);
         process.exit(1); // Detiene la aplicación si no hay BD
     }
@@ -54,7 +67,7 @@ const startServer = async () => {
 const shutdown = async (signal) => {
     console.log(`\n${signal} recibido. Cerrando servidor y conexiones...`);
     try {
-        // Puedes añadir aquí el cierre del servidor Express si lo deseas (server.close())
+        
         await db.close(); // Llama a la función close que exportamos
         console.log('Pool de conexión SQL Server cerrado.');
         process.exit(0);
