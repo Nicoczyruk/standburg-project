@@ -1,13 +1,108 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+/* index.css - Estilos globales en rojo y blanco */
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-}
+/* Reset básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  /* Tipografía global */
+  body {
+    font-family: 'Arial', sans-serif;
+    background-color: #ffffff; /* Fondo blanco */
+    color: #b30000; /* Rojo oscuro para el texto */
+    min-height: 100vh;
+  }
+  
+  /* Estilo general para encabezados */
+  h1, h2, h3, h4, h5, h6 {
+    color: #b30000; /* Rojo oscuro */
+  }
+  
+  /* Botones */
+  button {
+    background-color: #b30000; /* Fondo rojo */
+    color: #ffffff; /* Texto blanco */
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  button:hover {
+    background-color: #ff1a1a; /* Rojo más claro al pasar el mouse */
+  }
+  
+  /* Links */
+  a {
+    color: #b30000;
+    text-decoration: none;
+  }
+  
+  a:hover {
+    text-decoration: underline;
+  }
+  
+  /* Navegación */
+  .nav-menu {
+    background-color: #b30000; /* Fondo rojo */
+    padding: 10px;
+    display: flex;
+    gap: 20px;
+  }
+  
+  .nav-menu span, .nav-menu a {
+    color: #ffffff; /* Blanco para ítems de navegación */
+    font-weight: bold;
+    cursor: pointer;
+  }
+  
+  /* Header principal */
+  .main-header {
+    background-color: #b30000; /* Rojo para header */
+    padding: 15px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #ffffff;
+  }
+  
+  /* Logo */
+  .logo {
+    font-size: 24px;
+    font-weight: bold;
+  }
+  
+  /* Dropdown */
+  .dropdown {
+    position: relative;
+  }
+  
+  .dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #ffffff;
+    color: #b30000;
+    min-width: 120px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    padding: 10px 0;
+    z-index: 1;
+    border-radius: 5px;
+  }
+  
+  .dropdown-content span {
+    display: block;
+    padding: 8px 16px;
+    cursor: pointer;
+  }
+  
+  .dropdown-content span:hover {
+    background-color: #ffe6e6; /* Rojo muy clarito al hacer hover */
+  }
+  
+  .dropdown:hover .dropdown-content {
+    display: block;
+  }
+  

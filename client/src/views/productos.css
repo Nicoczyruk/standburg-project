@@ -1,0 +1,46 @@
+.productos-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.form-producto {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+input, button {
+  padding: 10px;
+  font-size: 16px;
+  flex: 1 0 30%;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+button {
+  background-color: #ff3b3b;
+  color: white;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #e03434;
+}
+
+.tabla-productos {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla-productos th, .tabla-productos td {
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: center;
+}

@@ -1,0 +1,261 @@
+/* Contenedor principal */
+.pedido-container {
+    padding: 1rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f8f8;
+    min-height: 100vh;
+  }
+  
+  /* Encabezado */
+  .pedido-header {
+    background-color: #b91c1c;
+    color: white;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 12px 12px 0 0;
+  }
+  
+  .pedido-header img {
+    height: 48px;
+  }
+  
+  .pedido-header .tipo-pedido button {
+    margin-left: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  
+  .pedido-header .tipo-pedido button.active {
+    background-color: black;
+    color: white;
+  }
+  
+  .pedido-header .tipo-pedido button:not(.active) {
+    background-color: white;
+    color: black;
+  }
+  
+  /* Grid principal */
+  .pedido-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Sección de productos */
+  .busqueda-input {
+    width: 100%;
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+  }
+  
+  .categorias {
+    display: flex;
+    overflow-x: auto;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  
+  .categoria-icon {
+    padding: 0.5rem 1rem;
+    background-color: #e5e7eb;
+    border-radius: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+  
+  .categoria-icon.activa {
+    background-color: #111827;
+    color: white;
+  }
+  
+  /* Cuadrícula de productos en matriz */
+  .productos-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+  
+  /* Tarjeta de producto */
+  .producto-card {
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 1rem;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.2s ease;
+  }
+  
+  .producto-card:hover {
+    transform: translateY(-4px);
+  }
+  
+  .producto-card img {
+    width: 100%;
+    max-width: 180px;
+    height: auto;
+    border-radius: 8px;
+    margin-bottom: 10px;
+  }
+  
+  .producto-card h4 {
+    font-size: 1.1rem;
+    margin: 0.5rem 0;
+    text-align: center;
+  }
+  
+  .producto-card p {
+    font-size: 0.9rem;
+    color: #555;
+    text-align: center;
+    margin-bottom: 0.5rem;
+  }
+  
+  .producto-card span {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+  
+  .producto-card button {
+    margin-top: auto;
+    background-color: #b91c1c;
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100%;
+  }
+  
+  .producto-card button:hover {
+    background-color: #991b1b;
+  }
+  
+  /* Carrito */
+  .carrito {
+    padding: 1rem;
+    background-color: #f3f4f6;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .carrito h2 {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+  }
+  
+  .carrito-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #d1d5db;
+    padding: 0.5rem 0;
+  }
+  
+  .carrito-item span {
+    flex: 1;
+    font-size: 0.95rem;
+  }
+  
+  .carrito-item .controles {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+  
+  .carrito-item button {
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    background-color: #e5e7eb;
+  }
+  
+  .carrito-item button:hover {
+    background-color: #d1d5db;
+  }
+  
+  .total-carrito {
+    text-align: right;
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-top: 1rem;
+  }
+  
+  .confirmar-btn {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background-color: #16a34a;
+    color: white;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  
+  .confirmar-btn:hover {
+    background-color: #15803d;
+  }
+  
+  /* Modal */
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+  }
+  
+  .modal-content {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    text-align: center;
+  }
+  
+  .modal-content h3 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+  }
+  
+  .modal-content button {
+    margin-top: 1.5rem;
+    background-color: #b91c1c;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  
+  .modal-content button:hover {
+    background-color: #991b1b;
+  }
+  

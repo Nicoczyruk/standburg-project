@@ -1,0 +1,48 @@
+.gastos-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  h1 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .form-gasto {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  input, button {
+    padding: 10px;
+    font-size: 16px;
+    flex: 1 0 40%;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  button {
+    background-color: #ff3b3b;
+    color: white;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #e03434;
+  }
+  
+  .lista-gastos {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .lista-gastos li {
+    padding: 10px;
+    margin-bottom: 5px;
+    background-color: #f5f5f5;
+    border-left: 5px solid #ff3b3b;
+  }
+  
