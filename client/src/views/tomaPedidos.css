@@ -1,0 +1,56 @@
+.toma-pedidos-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.toma-pedidos-container h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.form-cliente, .form-productos {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+input, select, button {
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+button {
+  background-color: #ff3b3b;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #e03434;
+}
+
+.lista-productos {
+  list-style: none;
+  padding: 0;
+}
+
+.lista-productos li {
+  padding: 10px;
+  margin: 5px 0;
+  background-color: #f5f5f5;
+  border-left: 5px solid #ff3b3b;
+}
+.productos-rapidos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.productos-rapidos button {
+  flex: 1 0 30%;
+}
