@@ -1,0 +1,61 @@
+.movimiento-caja-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  h1 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .form-movimiento, .filtros-movimiento {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  input, select, button {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  button {
+    background-color: #ff3b3b;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #e03434;
+  }
+  
+  .total-caja {
+    font-size: 24px;
+    text-align: right;
+    margin-bottom: 20px;
+  }
+  
+  .tabla-movimientos {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .tabla-movimientos th, .tabla-movimientos td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+  }
+  
+  .ingreso {
+    background-color: #d4fcd4;
+  }
+  
+  .egreso {
+    background-color: #fcd4d4;
+  }
+  
