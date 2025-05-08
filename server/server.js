@@ -2,6 +2,7 @@
 require('dotenv').config(); // Carga las variables de .env PRIMERO
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const db = require('./db/connection'); // Importa el módulo de conexión
 
 // IMPORTAR RUTAS
@@ -20,6 +21,13 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+const frontendDistPath = path.join(__dirname, '..', 'client', 'dist');
+
+// Log para verificar la ruta (útil para debugging)
+console.log(`[*] Sirviendo archivos estáticos desde: ${frontendDistPath}`);
+
+app.use(express.static(frontendDistPath));
+
 // --- Ruta de prueba básica (para saber que Express funciona) ---
 app.get('/', (req, res) => {
     res.json({ message: 'API Standburg - Servidor funcionando!' });
@@ -33,6 +41,26 @@ app.use('/api/pedidos', pedidoRoutes);
 app.use('/api/pagos', pagoRoutes);
 app.use('/api/turnos', turnoRoutes);
 
+
+// --- Ruta Catch-All para Single Page Application (SPA) ---
+// Esta ruta captura cualquier GET request que no haya coincidido con las rutas API anteriores.
+app.get('*', (req, res, next) => {
+    // Comprobación opcional para asegurarnos de no interferir con futuras rutas no-API
+    if (req.originalUrl.startsWith('/api/')) {
+        // Si por alguna razón una ruta API llegó hasta aquí, la pasamos al siguiente middleware (error 404)
+        return next();
+    }
+    // Para cualquier otra ruta, enviamos el index.html del frontend.
+    // React Router se encargará de mostrar el componente correcto en el cliente.
+    const indexPath = path.resolve(frontendDistPath, 'index.html');
+    res.sendFile(indexPath, (err) => {
+      if (err) {
+        // Si hay un error al enviar (ej. el archivo no existe), lo pasamos al manejador de errores.
+        console.error(`Error al enviar index.html (${indexPath}):`, err);
+        next(err);
+      }
+    });
+});
 
 // --- Middleware de Manejo de Errores  ---
 app.use((err, req, res, next) => {

@@ -3,6 +3,10 @@ const pedidoQueries = require('../db/queries/pedido.queries');
 
 const ESTADOS_PEDIDO_VALIDOS = ['pendiente', 'en preparacion', 'listo', 'entregado', 'pagado', 'cancelado'];
 
+// Mantén esta lista o ajústala a tus tipos válidos
+const TIPOS_PEDIDO_VALIDOS = ['mostrador', 'mesa', 'delivery'];
+
+
 // Obtener todos los pedidos con filtros
 const obtenerTodosLosPedidos = async (req, res, next) => {
     const { estado, mesa_id } = req.query;
@@ -51,51 +55,65 @@ const obtenerPedidoPorId = async (req, res, next) => {
     }
 };
 
-// Crear un nuevo pedido
 const crearPedido = async (req, res, next) => {
-    
-    const { mesa_id, admin_id, items } = req.body;
+    // Extraer datos del cliente y tipo del body, ya no esperamos admin_id
+    const { mesa_id, items, tipo, cliente_nombre, cliente_telefono, cliente_direccion, notas, costo_envio } = req.body;
 
-    // Validación básica de entrada
-    // TODO: Usar express-validator
-    if (mesa_id !== null && mesa_id !== undefined && (!Number.isInteger(parseInt(mesa_id)) || parseInt(mesa_id) <= 0)) {
-         return res.status(400).json({ message: 'ID de mesa inválido.' });
+    // --- Validación ---
+    if (!tipo || !TIPOS_PEDIDO_VALIDOS.includes(tipo)) {
+         return res.status(400).json({ message: `El campo "tipo" es obligatorio y válido.` });
     }
-     if (admin_id !== null && admin_id !== undefined && (!Number.isInteger(parseInt(admin_id)) || parseInt(admin_id) <= 0)) {
-         return res.status(400).json({ message: 'ID de admin inválido.' });
+    if (tipo === 'mesa' && (mesa_id === undefined || !Number.isInteger(parseInt(mesa_id)) || parseInt(mesa_id) <= 0)) {
+        return res.status(400).json({ message: 'Se requiere un "mesa_id" válido para tipo "mesa".' });
+    }
+    if (tipo === 'delivery' && !cliente_direccion) { // Ejemplo validación delivery
+        return res.status(400).json({ message: 'Se requiere "cliente_direccion" para tipo "delivery".' });
     }
     if (!items || !Array.isArray(items) || items.length === 0) {
-        return res.status(400).json({ message: 'Se requiere al menos un item en el pedido.' });
+        return res.status(400).json({ message: 'Se requiere al menos un item.' });
     }
-    // Validar cada item
-    for (const item of items) {
+    for (const item of items) { // Validación de items se mantiene
         if (!item.producto_id || !Number.isInteger(parseInt(item.producto_id)) || parseInt(item.producto_id) <= 0) {
-             return res.status(400).json({ message: 'Cada item debe tener un "producto_id" válido.' });
+             return res.status(400).json({ message: 'Item con "producto_id" inválido.' });
         }
         if (!item.cantidad || !Number.isInteger(parseInt(item.cantidad)) || parseInt(item.cantidad) <= 0) {
-            return res.status(400).json({ message: `Cantidad inválida para el producto ID ${item.producto_id}.` });
+            return res.status(400).json({ message: `Cantidad inválida para producto ID ${item.producto_id}.` });
         }
     }
+    // --- Fin Validación ---
 
+    // Preparar datos para la query, sin admin_id, con datos del cliente
     const pedidoData = {
-        // Convertir a null si es undefined o null explícitamente
-        mesa_id: mesa_id === undefined ? null : parseInt(mesa_id) || null,
-        admin_id: admin_id === undefined ? null : parseInt(admin_id) || null, // TODO: Reemplazar con req.user.admin_id
+        mesa_id: tipo === 'mesa' ? parseInt(mesa_id) : null,
+        cliente_nombre: cliente_nombre || null, // Usa null si no viene
+        cliente_telefono: cliente_telefono || null,
+        cliente_direccion: cliente_direccion || null,
+        notas: notas || null,
+        tipo: tipo,
         items: items.map(item => ({
             producto_id: parseInt(item.producto_id),
             cantidad: parseInt(item.cantidad)
         }))
+        // NOTA: costo_envio no se pasa directamente a la query actual,
+        // la query calcula el total basado solo en productos.
+        // Si necesitas incluir costo_envio en el total guardado,
+        // deberías ajustar la query `createPedidoTransaction`.
     };
 
     try {
         const nuevoPedido = await pedidoQueries.createPedidoTransaction(pedidoData);
         res.status(201).json(nuevoPedido);
     } catch (error) {
-         // Manejar errores específicos de la transacción (ej. producto no encontrado)
-        if (error.message.includes('Producto con ID') || error.message.includes('No se pudo crear el pedido')) {
-            return res.status(400).json({ message: error.message }); // 400 Bad Request
+        // Manejar errores específicos conocidos de la query
+        if (error.message.includes('Producto con ID') || error.message.includes('mesa con ID')) {
+            return res.status(400).json({ message: error.message });
         }
-        next(error); // Otros errores al manejador global
+        // Si tienes un CHECK constraint para el tipo
+        if (error.message.includes('CK_PEDIDOS_Tipo')) { // Ajusta nombre
+             return res.status(400).json({ message: `Tipo de pedido '${tipo}' inválido.` });
+        }
+        // Otros errores
+        next(error);
     }
 };
 
