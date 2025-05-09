@@ -121,96 +121,126 @@ const updatePedidoEstado = async (id, estado) => {
 
 /**
  * Crea un nuevo pedido y sus detalles usando una transacción.
- * CORREGIDO: No usa admin_id, usa las columnas cliente_*
- * @param {object} pedidoData - Datos: { mesa_id, cliente_nombre, cliente_telefono, cliente_direccion, notas, tipo, items: [{ producto_id, cantidad }] }.
+ * @param {object} pedidoData - Datos: { mesa_id, cliente_nombre, ..., tipo, items, estadoInicial }.
  */
-const createPedidoTransaction = async ({ mesa_id, cliente_nombre, cliente_telefono, cliente_direccion, notas, tipo, items }) => {
+const createPedidoTransaction = async ({
+    mesa_id,
+    cliente_nombre,
+    cliente_telefono,
+    cliente_direccion,
+    notas,
+    tipo,
+    items, // Este es el array de items que viene del frontend.
+    estadoInicial
+}) => {
     let transaction;
     try {
         transaction = await db.getTransaction();
 
-        // Validar productos (igual que antes)
-        const preciosProductos = {};
+        console.log("BACKEND DEBUG: Iniciando createPedidoTransaction con items:", JSON.stringify(items, null, 2));
+
+        // 1. Validar productos y almacenar sus precios actuales
+        const preciosProductos = {}; // Objeto para almacenar precios { producto_id: precio }
         for (const item of items) {
+            const productoIdValidado = parseInt(item.producto_id); // Parsear aquí por si acaso
+            if (isNaN(productoIdValidado) || productoIdValidado <= 0) {
+                await db.rollbackTransaction(transaction);
+                throw new Error(`Item con producto_id inválido o faltante: ${JSON.stringify(item)}`);
+            }
+
             const prodResult = await db.query(
                 'SELECT precio FROM PRODUCTOS WHERE producto_id = @producto_id;',
-                { producto_id: { type: sql.Int, value: item.producto_id } },
+                { producto_id: { type: sql.Int, value: productoIdValidado } },
                 transaction
             );
+
             if (!prodResult.recordset[0]) {
                 await db.rollbackTransaction(transaction);
-                throw new Error(`Producto con ID ${item.producto_id} no encontrado.`);
+                throw new Error(`Producto con ID ${productoIdValidado} no encontrado en la base de datos.`);
             }
-            preciosProductos[item.producto_id] = prodResult.recordset[0].precio;
+            preciosProductos[productoIdValidado] = prodResult.recordset[0].precio; // Guardar el precio
+            console.log(`BACKEND DEBUG: Precio para producto_id ${productoIdValidado}: ${preciosProductos[productoIdValidado]}`);
         }
 
-        // Insertar en PEDIDOS usando las columnas correctas
+        // 2. Insertar en PEDIDOS
+        const estadoParaInsertar = estadoInicial || 'PENDIENTE'; // El controlador ya define esto.
         const pedidoInsertResult = await db.query(
             `INSERT INTO PEDIDOS (mesa_id, cliente_nombre, cliente_telefono, cliente_direccion, notas, tipo, estado, total)
              OUTPUT INSERTED.pedido_id
-             VALUES (@mesa_id, @cliente_nombre, @cliente_telefono, @cliente_direccion, @notas, @tipo, 'PENDIENTE', 0.00);`, // Estado default 'PENDIENTE'
+             VALUES (@mesa_id, @cliente_nombre, @cliente_telefono, @cliente_direccion, @notas, @tipo, @estado, 0.00);`,
             {
-                mesa_id: { type: sql.Int, value: mesa_id }, // Será null si no es tipo mesa
+                mesa_id: { type: sql.Int, value: mesa_id },
                 cliente_nombre: { type: sql.NVarChar(150), value: cliente_nombre },
                 cliente_telefono: { type: sql.NVarChar(50), value: cliente_telefono },
                 cliente_direccion: { type: sql.NVarChar(255), value: cliente_direccion },
                 notas: { type: sql.NVarChar(sql.MAX), value: notas },
-                tipo: { type: sql.NVarChar(50), value: tipo } // Usamos la columna 'tipo'
+                tipo: { type: sql.NVarChar(50), value: tipo },
+                estado: { type: sql.NVarChar(50), value: estadoParaInsertar }
             },
             transaction
         );
         const nuevoPedidoId = pedidoInsertResult.recordset[0].pedido_id;
 
-        // Insertar en DETALLE_PEDIDO y calcular total (igual que antes)
+        // 3. Insertar en DETALLE_PEDIDO y calcular total
         let totalPedidoCalculado = 0;
         for (const item of items) {
-            const precioUnitario = preciosProductos[item.producto_id];
-            const cantidad = item.cantidad;
-            const subtotal = cantidad * precioUnitario;
+            const productoIdParaDetalle = parseInt(item.producto_id);
+            const cantidadParaDetalle = parseInt(item.cantidad);
+
+            // Validación redundante pero segura
+            if (isNaN(productoIdParaDetalle) || productoIdParaDetalle <= 0 || isNaN(cantidadParaDetalle) || cantidadParaDetalle <= 0) {
+                await db.rollbackTransaction(transaction);
+                throw new Error(`Datos de item inválidos para DETALLE_PEDIDO antes de insertar. producto_id: ${item.producto_id}, cantidad: ${item.cantidad}`);
+            }
+
+            const precioUnitario = preciosProductos[productoIdParaDetalle]; // <--- OBTENER PRECIO GUARDADO
+
+            if (precioUnitario === undefined || isNaN(parseFloat(precioUnitario))) {
+                await db.rollbackTransaction(transaction);
+                throw new Error(`Precio no encontrado o inválido para producto_id: ${productoIdParaDetalle} en el objeto preciosProductos. preciosProductos: ${JSON.stringify(preciosProductos)}`);
+            }
+
+            const subtotal = cantidadParaDetalle * parseFloat(precioUnitario);
             totalPedidoCalculado += subtotal;
+
+            console.log(`BACKEND DEBUG: Preparando para insertar en DETALLE_PEDIDO: pedido_id=${nuevoPedidoId}, producto_id=${productoIdParaDetalle}, cantidad=${cantidadParaDetalle}, precio_unitario=${precioUnitario}, subtotal=${subtotal}`);
 
             await db.query(
                 `INSERT INTO DETALLE_PEDIDO (pedido_id, producto_id, cantidad, precio_unitario, subtotal)
                  VALUES (@pedido_id, @producto_id, @cantidad, @precio_unitario, @subtotal);`,
                 {
                     pedido_id: { type: sql.Int, value: nuevoPedidoId },
-                    producto_id: { type: sql.Int, value: item.producto_id },
-                    cantidad: { type: sql.Int, value: cantidad },
-                    precio_unitario: { type: sql.Decimal(10, 2), value: precioUnitario },
-                    subtotal: { type: sql.Decimal(10, 2), value: subtotal }
+                    producto_id: { type: sql.Int, value: productoIdParaDetalle },
+                    cantidad: { type: sql.Int, value: cantidadParaDetalle },
+                    precio_unitario: { type: sql.Decimal(10, 2), value: parseFloat(precioUnitario) }, // Usar precioUnitario obtenido
+                    subtotal: { type: sql.Decimal(12, 2), value: subtotal }
                 },
                 transaction
             );
         }
 
-        // Actualizar el total en PEDIDOS (igual que antes)
-        // NOTA: Si el pedido es delivery y tiene costo de envío, ¿dónde se suma?
-        // Por ahora, solo sumamos el subtotal de productos. Podrías añadir el costo de envío aquí si lo pasas.
+        // 4. Actualizar el total en PEDIDOS
         await db.query(
             'UPDATE PEDIDOS SET total = @total WHERE pedido_id = @pedido_id;',
             {
-                total: { type: sql.Decimal(12, 2), value: totalPedidoCalculado }, // Ajusta el tipo decimal si es necesario
+                total: { type: sql.Decimal(12, 2), value: totalPedidoCalculado },
                 pedido_id: { type: sql.Int, value: nuevoPedidoId }
             },
             transaction
         );
 
-        // Confirmar transacción
+        // 5. Confirmar transacción
         await db.commitTransaction(transaction);
 
-        // Devolver el pedido completo
-        return await getPedidoById(nuevoPedidoId); // Necesita que getPedidoById también se actualice si cambian las columnas
+        // 6. Devolver el pedido completo
+        return await getPedidoById(nuevoPedidoId);
 
     } catch (error) {
-        console.error('Error al crear el pedido (transacción):', error.message);
-        if (transaction) {
+        console.error('Error completo en createPedidoTransaction:', error.message, error.stack); // Loguear el stack también
+        if (transaction && transaction._aborted === false && transaction._completed === false ) {
             try { await db.rollbackTransaction(transaction); } catch (rbErr) { console.error("Error durante el rollback:", rbErr); }
         }
-         // Manejar error de FK de mesa_id
-         if (error.number === 547 && error.message.includes('FK_PEDIDOS_MESAS')) {
-             throw new Error(`La mesa con ID ${mesa_id} no existe.`);
-        }
-        throw new Error(error.message || 'No se pudo crear el pedido.');
+        throw error; // Relanzar para que el controlador lo maneje (o uno más específico si se prefiere)
     }
 };
 

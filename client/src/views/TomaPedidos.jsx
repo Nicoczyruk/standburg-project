@@ -137,6 +137,7 @@ const TomaPedidos = ({ cambiarVista }) => {
       notas: null,
       // 'costo_envio' no se envía aquí, el backend no lo usa directamente en PEDIDOS.total por ahora
       items: itemsParaEnviar,
+      estadoInicial: 'PENDIENTE'
     };
 
     console.log("Enviando payload a /api/pedidos:", JSON.stringify(payload, null, 2));
