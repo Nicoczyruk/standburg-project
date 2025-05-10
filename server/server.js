@@ -12,6 +12,10 @@ const mesaRoutes = require('./routes/mesa.routes');
 const pedidoRoutes = require('./routes/pedido.routes');
 const pagoRoutes = require('./routes/pago.routes');
 const turnoRoutes = require('./routes/turno.routes');
+const gastoRoutes = require('./routes/gasto.routes');
+const arqueoRoutes = require('./routes/arqueo.routes');
+const movimientoCajaRoutes = require('./routes/movimientoCaja.routes');
+
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -40,6 +44,9 @@ app.use('/api/mesas', mesaRoutes);
 app.use('/api/pedidos', pedidoRoutes);
 app.use('/api/pagos', pagoRoutes);
 app.use('/api/turnos', turnoRoutes);
+app.use('/api/gastos', gastoRoutes); 
+app.use('/api/arqueos', arqueoRoutes);
+app.use('/api/movimientos-caja', movimientoCajaRoutes);
 
 
 // --- Ruta Catch-All para Single Page Application (SPA) ---
