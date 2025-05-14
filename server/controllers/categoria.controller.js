@@ -36,7 +36,7 @@ const crearCategoria = async (req, res, next) => {
     const { nombre, descripcion } = req.body;
 
     // Validación básica (el nombre es obligatorio)
-    // TODO: Añadir validación más robusta 
+    
     if (!nombre || typeof nombre !== 'string' || nombre.trim() === '') {
         return res.status(400).json({ message: 'El campo "nombre" es obligatorio.' });
     }
@@ -59,7 +59,7 @@ const actualizarCategoria = async (req, res, next) => {
         return res.status(400).json({ message: 'ID de categoría inválido.' });
     }
     // Validación básica de nombre
-    // TODO: Añadir validación más robusta
+    
     if (!nombre || typeof nombre !== 'string' || nombre.trim() === '') {
         return res.status(400).json({ message: 'El campo "nombre" es obligatorio.' });
     }

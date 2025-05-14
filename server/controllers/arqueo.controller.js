@@ -20,8 +20,6 @@ const abrirNuevoArqueo = async (req, res, next) => {
 };
 
 const cerrarArqueoActivo = async (req, res, next) => {
-    // El ID del arqueo a cerrar vendrá del arqueo activo, no como parámetro de ruta necesariamente
-    // O podría ser un PUT /api/arqueos/activo/cerrar
     const { monto_cierre_efectivo_real, monto_cierre_tarjeta_real, monto_cierre_transferencia_real, notas_cierre } = req.body;
 
     // Validaciones de los montos reales
@@ -71,9 +69,6 @@ const obtenerArqueoActivoActual = async (req, res, next) => {
 };
 
 const obtenerHistorial = async (req, res, next) => {
-    // Aquí podrías añadir filtros de fecha desde req.query si los necesitas
-    // const { fecha_desde, fecha_hasta } = req.query;
-    // const filters = { fecha_desde, fecha_hasta };
     try {
         const historial = await arqueoQueries.getHistorialArqueos(/* filters */);
         res.json(historial || []);

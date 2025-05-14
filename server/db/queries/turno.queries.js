@@ -4,7 +4,7 @@ const sql = require('mssql');
 
 /**
  * Obtiene el turno activo actualmente (aquel sin fecha de cierre).
- * Debería haber como máximo uno.
+ * 
  */
 const getTurnoActivo = async () => {
     try {
@@ -29,7 +29,6 @@ const getTurnoActivo = async () => {
  */
 const getAllTurnos = async (filters = {}) => {
     try {
-        // TODO: Añadir filtros de fecha si es necesario
         const queryString = `
             SELECT
                 t.turno_id, t.admin_id_apertura, admin_ap.nombre_usuario AS admin_apertura_nombre,
@@ -65,7 +64,7 @@ const getTurnoById = async (id) => {
             LEFT JOIN ADMIN admin_ci ON t.admin_id_cierre = admin_ci.admin_id
             WHERE t.turno_id = @id;`;
         const { recordset } = await db.query(queryString, { id: { type: sql.Int, value: id } });
-        // TODO: Podría añadirse aquí una consulta para sumar los pagos de este turno
+        
         return recordset[0];
     } catch (error) {
         console.error(`Error al obtener el turno con ID ${id}:`, error);
@@ -103,7 +102,6 @@ const abrirTurno = async (admin_id_apertura, monto_inicial) => {
 
     } catch (error) {
         console.error('Error al abrir turno:', error.message);
-        // Manejar error de FK si admin_id_apertura no existe
         if (error.number === 547 && error.message.includes('FK_TURNOS_AdminApertura')) {
             throw new Error(`El admin con ID ${admin_id_apertura} no existe.`);
         }

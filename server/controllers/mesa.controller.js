@@ -38,7 +38,6 @@ const crearMesa = async (req, res, next) => {
     const { numero_mesa, capacidad, estado } = req.body;
 
     // Validación básica
-    // TODO: Usar express-validator
     if (numero_mesa === undefined || !Number.isInteger(parseInt(numero_mesa)) || parseInt(numero_mesa) <= 0) {
          return res.status(400).json({ message: 'El campo "numero_mesa" es obligatorio y debe ser un número entero positivo.' });
     }
@@ -51,7 +50,7 @@ const crearMesa = async (req, res, next) => {
 
     const mesaData = {
         numero_mesa: parseInt(numero_mesa),
-        // Incluir capacidad y estado solo si fueron proporcionados, para usar defaults de DB
+       
         ...(capacidad !== undefined && { capacidad: parseInt(capacidad) }),
         ...(estado !== undefined && { estado: estado })
     };
@@ -83,7 +82,6 @@ const actualizarMesa = async (req, res, next) => {
     }
 
     // Validación de datos de entrada
-    // TODO: Usar express-validator
     if (numero_mesa === undefined || !Number.isInteger(parseInt(numero_mesa)) || parseInt(numero_mesa) <= 0) {
          return res.status(400).json({ message: 'El campo "numero_mesa" es obligatorio y debe ser un número entero positivo.' });
     }
@@ -101,12 +99,6 @@ const actualizarMesa = async (req, res, next) => {
     };
 
     try {
-        // POR VER: verificar si la mesa existe antes de intentar actualizar
-        // const mesaExistente = await mesaQueries.getMesaById(mesaIdInt);
-        // if (!mesaExistente) {
-        //     return res.status(404).json({ message: `Mesa con ID ${id} no encontrada.` });
-        // }
-
         const mesaActualizada = await mesaQueries.updateMesa(mesaIdInt, mesaData);
         if (!mesaActualizada) {
             // Si la query no devolvió nada, es que el ID no existía

@@ -2,11 +2,9 @@
 const gastoQueries = require('../db/queries/gasto.queries');
 
 const obtenerTodos = async (req, res, next) => {
-    // TODO: Obtener filtros de req.query (turno_id, tipo_gasto, fechas)
     const filters = {};
     if (req.query.turno_id) filters.turno_id = parseInt(req.query.turno_id);
     if (req.query.tipo_gasto) filters.tipo_gasto = req.query.tipo_gasto;
-    // Añadir más filtros si es necesario
 
     try {
         const gastos = await gastoQueries.getAllGastos(filters);
@@ -34,8 +32,6 @@ const obtenerPorId = async (req, res, next) => {
 };
 
 const crear = async (req, res, next) => {
-    // Asumir que admin_id_registro vendrá de req.user cuando implementes auth
-    // Por ahora, lo podemos dejar como opcional o enviar null/un ID de prueba
     const { turno_id, tipo_gasto, concepto, monto, notas_adicionales, admin_id_registro = null } = req.body;
 
     // Validaciones
@@ -51,7 +47,7 @@ const crear = async (req, res, next) => {
     if (turno_id !== undefined && turno_id !== null && (isNaN(parseInt(turno_id)) || parseInt(turno_id) <=0)) {
         return res.status(400).json({ message: 'Si se provee "turno_id", debe ser un ID numérico válido.' });
     }
-    // Validar admin_id_registro si es mandatorio o viene
+    
 
     const gastoData = {
         turno_id: turno_id ? parseInt(turno_id) : null,
@@ -84,7 +80,7 @@ const actualizar = async (req, res, next) => {
     // Similar a crear, pero para actualizar
     const { turno_id, tipo_gasto, concepto, monto, notas_adicionales, admin_id_registro = null } = req.body;
 
-    // Validaciones (puedes reutilizar o crear una función helper)
+    // Validaciones 
     if (!tipo_gasto || !gastoQueries.TIPOS_GASTO_VALIDOS.includes(tipo_gasto)) { /*...*/ }
     if (!concepto || typeof concepto !== 'string' || concepto.trim() === '') { /*...*/ }
     if (monto === undefined || typeof parseFloat(monto) !== 'number' || parseFloat(monto) <= 0) { /*...*/ }

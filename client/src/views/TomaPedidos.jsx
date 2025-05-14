@@ -5,15 +5,13 @@ const TomaPedidos = ({ cambiarVista }) => {
   // --- Estados ---
   const [tipoPedido, setTipoPedido] = useState('');
   const [cliente, setCliente] = useState({ nombre: '', telefono: '', direccion: '', costoEnvio: '' });
-  const [carrito, setCarrito] = useState({}); // Objeto para manejar { producto_id: { ...producto, cantidad } }
+  const [carrito, setCarrito] = useState({});
   const [productosDisponibles, setProductosDisponibles] = useState([]);
   const [loadingProductos, setLoadingProductos] = useState(true);
-  const [error, setError] = useState(null); // Para errores generales o de carga
-  const [submitError, setSubmitError] = useState(null); // Para errores de envío
+  const [error, setError] = useState(null);
+  const [submitError, setSubmitError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  // TODO: Añadir estado para mesas si se implementa selección
-  // const [mesasDisponibles, setMesasDisponibles] = useState([]);
-  // const [mesaSeleccionadaId, setMesaSeleccionadaId] = useState(''); // O guardar en cliente.mesa_id
+  const [metodoPago, setMetodoPago] = useState('efectivo'); // <-- NUEVO ESTADO para método de pago
 
   // --- Cargar Productos Disponibles ---
   useEffect(() => {
@@ -36,12 +34,7 @@ const TomaPedidos = ({ cambiarVista }) => {
       }
     };
     fetchProductos();
-
-    // TODO: Cargar mesas si se necesita
-    // const fetchMesas = async () => { /* ... fetch('/api/mesas') ... */ };
-    // fetchMesas();
-
-  }, []); // Ejecutar solo al montar
+  }, []);
 
   // --- Manejar Cambios en Datos del Cliente ---
   const handleChangeCliente = (e) => {
@@ -81,12 +74,12 @@ const TomaPedidos = ({ cambiarVista }) => {
   // --- Limpiar Estado ---
   const limpiarFormulario = () => {
     setTipoPedido('');
-    setCliente({ nombre: '', telefono: '', direccion: '', costoEnvio: '' /*, mesa_id: '' */ });
+    setCliente({ nombre: '', telefono: '', direccion: '', costoEnvio: '' });
     setCarrito({});
+    setMetodoPago('efectivo'); // Resetear método de pago
     setError(null);
     setSubmitError(null);
     setIsSubmitting(false);
-    // setMesaSeleccionadaId('');
   };
 
   // --- Confirmar y Enviar Pedido (POST /api/pedidos) ---
@@ -99,7 +92,6 @@ const TomaPedidos = ({ cambiarVista }) => {
       cantidad: item.cantidad,
     }));
 
-    // Validaciones (igual que antes)
     if (itemsParaEnviar.length === 0) {
       setSubmitError("El pedido debe contener al menos un producto.");
       setIsSubmitting(false);
@@ -110,34 +102,33 @@ const TomaPedidos = ({ cambiarVista }) => {
          setIsSubmitting(false);
          return;
     }
-    // Validación de mesa_id si es necesario
+    if (!metodoPago) { // Validación para el nuevo campo
+        setSubmitError("Debe seleccionar un método de pago.");
+        setIsSubmitting(false);
+        return;
+    }
     const mesaIdParsed = cliente.mesa_id ? parseInt(cliente.mesa_id) : null;
     if (tipoPedido === 'mesa' && (!mesaIdParsed || mesaIdParsed <= 0) ) {
          setSubmitError("Debe seleccionar una mesa válida para pedidos de tipo 'mesa'.");
          setIsSubmitting(false);
          return;
     }
-     // Validación de dirección para delivery
      if (tipoPedido === 'delivery' && !cliente.direccion) {
         setSubmitError("La dirección es obligatoria para pedidos de tipo 'delivery'.");
         setIsSubmitting(false);
         return;
      }
 
-
-    // Prepara el payload para la API - SIN admin_id, CON datos del cliente
     const payload = {
       mesa_id: tipoPedido === 'mesa' ? mesaIdParsed : null,
       tipo: tipoPedido,
-      // Añadir datos del cliente desde el estado 'cliente'
       cliente_nombre: cliente.nombre || null,
       cliente_telefono: cliente.telefono || null,
       cliente_direccion: cliente.direccion || null,
-      // 'notas' no está en el form actual, se enviaría null o añadir input/textarea
       notas: null,
-      // 'costo_envio' no se envía aquí, el backend no lo usa directamente en PEDIDOS.total por ahora
       items: itemsParaEnviar,
-      estadoInicial: 'PENDIENTE'
+      estadoInicial: 'PENDIENTE', // El backend se encargará del estado del pago
+      metodo_pago: metodoPago // <-- AÑADIDO metodo_pago
     };
 
     console.log("Enviando payload a /api/pedidos:", JSON.stringify(payload, null, 2));
@@ -156,9 +147,8 @@ const TomaPedidos = ({ cambiarVista }) => {
 
       const pedidoCreado = await response.json();
       console.log('Pedido creado exitosamente:', pedidoCreado);
-      alert(`Pedido #${pedidoCreado.pedido_id} creado exitosamente!`);
+      alert(`Pedido #${pedidoCreado.pedido_id} creado exitosamente con método de pago: ${metodoPago}!`);
       limpiarFormulario();
-      // cambiarVista('confirmarPedido');
 
     } catch (err) {
       console.error("Error al confirmar pedido:", err);
@@ -182,7 +172,6 @@ const TomaPedidos = ({ cambiarVista }) => {
     <div className="toma-pedidos-container">
       <h1>Tomar Pedido</h1>
 
-      {/* Selector de Tipo de Pedido */}
       <select value={tipoPedido} onChange={(e) => setTipoPedido(e.target.value)} disabled={isSubmitting}>
         <option value="" disabled>-- Seleccionar Tipo --</option>
         <option value="mostrador">Mostrador</option>
@@ -190,23 +179,17 @@ const TomaPedidos = ({ cambiarVista }) => {
         <option value="delivery">Delivery</option>
       </select>
 
-      {/* Formulario Cliente (Condicional) */}
       {(tipoPedido === 'mostrador' || tipoPedido === 'mesa' || tipoPedido === 'delivery') && (
         <div className="form-cliente">
           <input
             type="text" name="nombre" placeholder="Nombre Cliente"
             value={cliente.nombre} onChange={handleChangeCliente} disabled={isSubmitting}
           />
-          {/* Ejemplo de cómo añadirías el selector de Mesa */}
           {tipoPedido === 'mesa' && (
-             <input // Temporalmente un input, idealmente un <select> cargado con /api/mesas
+             <input
                type="number" name="mesa_id" placeholder="ID Mesa"
                value={cliente.mesa_id || ''} onChange={handleChangeCliente} disabled={isSubmitting}
              />
-            /* <select name="mesa_id" value={cliente.mesa_id || ''} onChange={handleChangeCliente} disabled={isSubmitting}>
-              <option value="">Seleccionar Mesa</option>
-              {mesasDisponibles.map(m => <option key={m.mesa_id} value={m.mesa_id}>{m.numero_mesa}</option>)}
-            </select> */
           )}
           {(tipoPedido === 'mostrador' || tipoPedido === 'delivery') && (
             <input
@@ -230,7 +213,6 @@ const TomaPedidos = ({ cambiarVista }) => {
         </div>
       )}
 
-      {/* Selección Rápida de Productos */}
       <h2>Productos Disponibles</h2>
       {error && !loadingProductos && <p style={{ color: 'orange' }}>Advertencia: {error}</p>}
       <div className="productos-rapidos">
@@ -245,7 +227,6 @@ const TomaPedidos = ({ cambiarVista }) => {
         )}
       </div>
 
-      {/* Resumen del Pedido (Carrito) */}
       <h2>Pedido Actual</h2>
       {carritoArray.length === 0 ? (
         <p>Agrega productos al pedido.</p>
@@ -266,14 +247,30 @@ const TomaPedidos = ({ cambiarVista }) => {
         </ul>
       )}
 
-      {/* Totales y Confirmación */}
+      {/* Totales, Método de Pago y Confirmación */}
       <div className="totales">
         <p>Subtotal: ${subtotal.toFixed(2)}</p>
         {tipoPedido === 'delivery' && cliente.costoEnvio !== '' && <p>Envío: ${costoEnvioNumerico.toFixed(2)}</p>}
         <h3>Total: ${total.toFixed(2)}</h3>
-        {/* Mostrar error de submit */}
+
+        {/* NUEVO SELECTOR para Método de Pago */}
+        <div className="metodo-pago-selector">
+            <label htmlFor="metodoPago">Método de Pago: </label>
+            <select
+                id="metodoPago"
+                value={metodoPago}
+                onChange={(e) => setMetodoPago(e.target.value)}
+                disabled={isSubmitting}
+            >
+                <option value="efectivo">Efectivo</option>
+                <option value="transferencia">Transferencia</option>
+                <option value="tarjeta_credito">Tarjeta de Crédito</option>
+                <option value="tarjeta_debito">Tarjeta de Débito</option>
+            </select>
+        </div>
+
         {submitError && <p style={{ color: 'red' }}>{submitError}</p>}
-        <button onClick={confirmarPedido} disabled={isSubmitting || carritoArray.length === 0 || !tipoPedido}>
+        <button onClick={confirmarPedido} disabled={isSubmitting || carritoArray.length === 0 || !tipoPedido || !metodoPago}>
           {isSubmitting ? 'Confirmando...' : 'Confirmar Pedido'}
         </button>
          <button type="button" onClick={limpiarFormulario} disabled={isSubmitting} style={{ marginLeft: '10px', backgroundColor: '#555' }}>

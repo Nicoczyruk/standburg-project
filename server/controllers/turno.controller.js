@@ -3,7 +3,6 @@ const turnoQueries = require('../db/queries/turno.queries');
 
 // Obtener historial de turnos
 const obtenerTodosLosTurnos = async (req, res, next) => {
-    // TODO: Añadir filtros de fecha desde req.query si se implementan
     try {
         const turnos = await turnoQueries.getAllTurnos();
         res.json(turnos || []);
@@ -45,7 +44,6 @@ const obtenerTurnoPorId = async (req, res, next) => {
 
 // Abrir un nuevo turno
 const abrirNuevoTurno = async (req, res, next) => {
-    // TODO: Obtener admin_id_apertura desde el usuario autenticado (req.user.admin_id)
     const { admin_id_apertura, monto_inicial } = req.body;
 
     // Validación básica
@@ -75,7 +73,6 @@ const abrirNuevoTurno = async (req, res, next) => {
 // Cerrar el turno activo
 const cerrarTurnoActivo = async (req, res, next) => {
     const { id } = req.params; // ID del turno que se intenta cerrar
-     // TODO: Obtener admin_id_cierre desde el usuario autenticado (req.user.admin_id)
     const { admin_id_cierre, monto_final_real } = req.body;
     const turnoIdInt = parseInt(id);
 
@@ -97,7 +94,7 @@ const cerrarTurnoActivo = async (req, res, next) => {
     } catch (error) {
         // Errores específicos de la transacción (no activo, no existe, admin cierre no existe)
         if (error.message.includes('no está activo o no existe') || error.message.includes('ya estaba cerrado')) {
-             return res.status(404).json({ message: error.message }); // 404 Not Found o 409 Conflict? Usemos 404
+             return res.status(404).json({ message: error.message }); // 404 Not Found o 409 Conflict?
         }
         if (error.message.includes('admin con ID') && error.message.includes('no existe')) {
              return res.status(400).json({ message: error.message }); // 400 Bad Request

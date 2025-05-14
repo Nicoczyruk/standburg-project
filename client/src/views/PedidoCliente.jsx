@@ -14,9 +14,9 @@ const PedidoCliente = () => {
   const [formCliente, setFormCliente] = useState({
     nombre: '',
     telefono: '',
-    pago: 'efectivo', // Asumiendo que este es un valor por defecto
+    pago: 'efectivo', // Valor por defecto
     direccion: '',
-    correo: '', // Tu tabla PEDIDOS no tiene correo, pero el form sí. Ajusta si es necesario.
+    correo: '',
     comentario: '' // Este es 'notas' en tu tabla PEDIDOS
   });
 
@@ -71,7 +71,7 @@ const PedidoCliente = () => {
     if (categoriaSeleccionada) {
       setProductosFiltrados(productos.filter(p => p.categoria_id === parseInt(categoriaSeleccionada)));
     } else {
-      setProductosFiltrados(productos); // Mostrar todos si no hay categoría seleccionada (o la primera)
+      setProductosFiltrados(productos);
     }
   }, [categoriaSeleccionada, productos]);
 
@@ -119,7 +119,6 @@ const PedidoCliente = () => {
     setCarrito({});
     setFormCliente({ nombre: '', telefono: '', pago: 'efectivo', direccion: '', correo: '', comentario: '' });
     setTipoPedido('mostrador');
-    // setCategoriaSeleccionada(categorias.length > 0 ? categorias[0].categoria_id : ''); // Resetear a la primera categoría
     setError(null);
     setSubmitError(null);
     setIsSubmitting(false);
@@ -132,7 +131,6 @@ const PedidoCliente = () => {
     setSubmitError(null);
     setIsSubmitting(true);
 
-    // Validaciones del formulario
     if (!formCliente.nombre.trim()) {
       setSubmitError('El nombre es obligatorio.');
       setIsSubmitting(false);
@@ -148,29 +146,27 @@ const PedidoCliente = () => {
       setIsSubmitting(false);
       return;
     }
-
-    console.log("DEBUG Frontend: Contenido del carrito ANTES de map:", JSON.stringify(carrito, null, 2));
+    if (!formCliente.pago) {
+        setSubmitError('Debe seleccionar un método de pago.');
+        setIsSubmitting(false);
+        return;
+    }
 
     const itemsParaEnviar = Object.values(carrito).map(item => ({
       producto_id: item.producto_id,
       cantidad: item.cantidad
     }));
 
-    console.log("DEBUG Frontend: itemsParaEnviar DESPUÉS de map:", JSON.stringify(itemsParaEnviar, null, 2));
-
     const payload = {
-      tipo: tipoPedido, // 'mostrador' o 'delivery'
+      tipo: tipoPedido,
       cliente_nombre: formCliente.nombre.trim(),
       cliente_telefono: formCliente.telefono.trim() || null,
       cliente_direccion: tipoPedido === 'delivery' ? formCliente.direccion.trim() : null,
-      notas: formCliente.comentario.trim() || null, // 'comentario' del form va a 'notas'
+      notas: formCliente.comentario.trim() || null,
       items: itemsParaEnviar,
-      mesa_id: null, // Los clientes no eligen mesa desde esta interfaz
-      // El total se calculará en el backend
+      mesa_id: null,
+      metodo_pago: formCliente.pago // <-- AÑADIDO metodo_pago
     };
-    // El campo 'pago' del form (efectivo/transferencia) no se envía directamente al crear el pedido.
-    // Se gestionaría al momento de registrar el PAGO en la BD, que es un paso posterior.
-    // Tu tabla PEDIDOS no tiene un campo para 'correo', así que no lo enviamos.
 
     console.log("Enviando pedido de cliente:", JSON.stringify(payload, null, 2));
 
@@ -188,8 +184,7 @@ const PedidoCliente = () => {
 
       const pedidoCreado = await response.json();
       console.log('Pedido de cliente creado:', pedidoCreado);
-      setModalVisible(true); // Mostrar modal de éxito
-      // No limpiamos todo aquí, lo hacemos al cerrar el modal
+      setModalVisible(true);
     } catch (err) {
       console.error("Error al enviar pedido:", err);
       setSubmitError(`Error: ${err.message}`);
@@ -290,14 +285,14 @@ const PedidoCliente = () => {
             {tipoPedido === 'delivery' && (
               <>
                 <input name="direccion" placeholder="Dirección Completa*" value={formCliente.direccion} onChange={handleChangeFormCliente} required disabled={isSubmitting} />
-                {/* Tu tabla no tiene 'correo', considera si lo necesitas o quítalo del form */}
-                {/* <input name="correo" type="email" placeholder="Correo electrónico (Opcional)" value={formCliente.correo} onChange={handleChangeFormCliente} disabled={isSubmitting} /> */}
               </>
             )}
+            {/* MODIFICADO el select de pago */}
             <select name="pago" value={formCliente.pago} onChange={handleChangeFormCliente} required disabled={isSubmitting}>
               <option value="efectivo">Efectivo</option>
               <option value="transferencia">Transferencia</option>
-              {/* Añade más métodos si los manejas */}
+              <option value="tarjeta_credito">Tarjeta de Crédito</option>
+              <option value="tarjeta_debito">Tarjeta de Débito</option>
             </select>
             <textarea name="comentario" placeholder="Comentario Adicional (Opcional)" value={formCliente.comentario} onChange={handleChangeFormCliente} disabled={isSubmitting} />
 

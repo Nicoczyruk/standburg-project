@@ -2,7 +2,7 @@
 const db = require('../connection');
 const sql = require('mssql');
 
-// --- getArqueoActivo, abrirArqueo, getHistorialArqueos, getArqueoById se mantienen igual que en la respuesta anterior ---
+
 const getArqueoActivo = async () => {
     try {
         const queryString = `
@@ -81,7 +81,7 @@ const cerrarArqueo = async (arqueo_id, monto_cierre_efectivo_real, monto_cierre_
         // Para ARQUEOS_CAJA, las ventas "calculadas" por método serán 0,
         // ya que el desglose real vendrá del conteo manual.
         // El 'total_ventas_pedidos_calculado' se considera para el efectivo esperado.
-        const ventas_efectivo_calculado = total_ventas_pedidos_calculado; // Asumimos que todo afecta efectivo
+        const ventas_efectivo_calculado = total_ventas_pedidos_calculado; 
         const ventas_tarjeta_calculado = 0;
         const ventas_transferencia_calculado = 0;
         
@@ -137,9 +137,9 @@ const cerrarArqueo = async (arqueo_id, monto_cierre_efectivo_real, monto_cierre_
         
         const diferencia_efectivo = parseFloat(monto_cierre_efectivo_real) - monto_final_esperado_efectivo;
         // Las diferencias de tarjeta y transferencia serán el monto contado, ya que el "calculado" por ventas de pedidos es 0.
-        // Si tienes movimientos manuales de tarjeta/transferencia en MOVIMIENTOS_CAJA, deberías sumarlos/restarlos también aquí.
-        const diferencia_tarjeta = parseFloat(monto_cierre_tarjeta_real) - 0; // Asumiendo 0 ventas de pedidos por tarjeta
-        const diferencia_transferencia = parseFloat(monto_cierre_transferencia_real) - 0; // Asumiendo 0 ventas de pedidos por transf.
+        
+        const diferencia_tarjeta = parseFloat(monto_cierre_tarjeta_real) - 0; 
+        const diferencia_transferencia = parseFloat(monto_cierre_transferencia_real) - 0; 
 
         // 6. Actualizar el arqueo
         const updateResult = await db.query(
@@ -211,7 +211,7 @@ const getHistorialArqueos = async (filters = {}) => {
             params.fecha_desde = { type: sql.DateTime2, value: filters.fecha_desde };
         }
         if (filters.fecha_hasta) {
-            queryString += ' AND fecha_hora_apertura <= @fecha_hasta'; // O fecha_hora_cierre, según necesidad
+            queryString += ' AND fecha_hora_apertura <= @fecha_hasta'; 
             params.fecha_hasta = { type: sql.DateTime2, value: filters.fecha_hasta };
         }
 

@@ -1,7 +1,7 @@
 // server/routes/arqueo.routes.js
 const express = require('express');
 const arqueoController = require('../controllers/arqueo.controller');
-// const authMiddleware = require('../middleware/auth.middleware'); // Descomentar cuando se implemente
+// const authMiddleware = require('../middleware/auth.middleware'); 
 
 const router = express.Router();
 

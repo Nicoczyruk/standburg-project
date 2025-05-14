@@ -92,8 +92,6 @@ const createPagoTransaction = async ({ pedido_id, turno_id, metodo_pago, monto }
         }
 
         // 4. Insertar el pago
-        //    Si no se proporciona turno_id, se insertará como NULL si la columna lo permite.
-        //    TODO: Idealmente, buscaríamos el turno activo aquí si turno_id no se proporciona.
         const pagoInsertResult = await db.query(
             `INSERT INTO PAGOS (pedido_id, turno_id, metodo_pago, monto, fecha_hora)
              OUTPUT INSERTED.*

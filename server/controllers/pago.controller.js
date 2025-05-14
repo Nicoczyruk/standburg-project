@@ -61,7 +61,6 @@ const crearPago = async (req, res, next) => {
     const { pedido_id, turno_id, metodo_pago, monto } = req.body;
 
     // Validación de entrada
-    // TODO: Usar express-validator
     if (!pedido_id || !Number.isInteger(parseInt(pedido_id)) || parseInt(pedido_id) <= 0) {
          return res.status(400).json({ message: 'El campo "pedido_id" es obligatorio y debe ser un ID válido.' });
     }
@@ -109,7 +108,6 @@ const eliminarPago = async (req, res, next) => {
     try {
         const fueEliminado = await pagoQueries.deletePagoTransaction(pagoIdInt);
         if (!fueEliminado) {
-             // Esto no debería ocurrir si la transacción maneja el error de "no encontrado"
             return res.status(404).json({ message: `Pago con ID ${id} no encontrado.` });
         }
         res.status(204).send(); // 204 No Content

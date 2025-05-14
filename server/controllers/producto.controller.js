@@ -1,7 +1,7 @@
 // server/controllers/producto.controller.js
 const productoQueries = require('../db/queries/producto.queries');
 
-// Obtener todos los productos (opcionalmente filtrados por categoría vía query param, VER QUERY)
+// Obtener todos los productos 
 const obtenerTodosLosProductos = async (req, res, next) => {
     const { categoria_id } = req.query; // Obtener el filtro de la query string ?categoria_id=X
     let categoriaIdInt = null;
@@ -51,12 +51,6 @@ const obtenerProductosPorCategoria = async (req, res, next) => {
     }
 
     try {
-        // Opcional: verificar si la categoría existe antes de buscar productos
-        // const categoria = await require('../db/queries/categoria.queries').getCategoriaById(categoriaIdInt);
-        // if (!categoria) {
-        //     return res.status(404).json({ message: `Categoría con ID ${categoria_id} no encontrada.` });
-        // }
-
         const productos = await productoQueries.getProductosByCategoriaId(categoriaIdInt);
         // Es normal que una categoría no tenga productos, devolver array vacío como respuesta MANEJAR
         res.json(productos || []);
@@ -70,7 +64,6 @@ const obtenerProductosPorCategoria = async (req, res, next) => {
 const crearProducto = async (req, res, next) => {
     const { nombre, descripcion, precio, categoria_id } = req.body;
 
-    // TODO: Añadir validación más robusta (express-validator)
     if (!nombre || typeof nombre !== 'string' || nombre.trim() === '') {
         return res.status(400).json({ message: 'El campo "nombre" es obligatorio.' });
     }
@@ -113,7 +106,6 @@ const actualizarProducto = async (req, res, next) => {
     if (!Number.isInteger(productoIdInt) || productoIdInt <= 0) {
         return res.status(400).json({ message: 'ID de producto inválido.' });
     }
-    // TODO: Añadir validación más robusta para el body
     if (!nombre || typeof nombre !== 'string' || nombre.trim() === '') {
         return res.status(400).json({ message: 'El campo "nombre" es obligatorio.' });
     }

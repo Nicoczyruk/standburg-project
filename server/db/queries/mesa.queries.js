@@ -112,7 +112,7 @@ const deleteMesa = async (id) => {
         return result.rowsAffected[0] > 0;
     } catch (error) {
         console.error(`Error al eliminar la mesa con ID ${id}:`, error);
-        // Aunque la FK permite borrar, podría haber otros errores inesperados.
+        
         throw error;
     }
 };

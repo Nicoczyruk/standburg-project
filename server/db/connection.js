@@ -6,7 +6,7 @@ const sql = require('mssql');
 const dbConfig = {
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
-    server: process.env.DB_SERVER, // ej. localhost, localhost\SQLEXPRESS, server.database.windows.net
+    server: process.env.DB_SERVER, 
     database: process.env.DB_DATABASE,
     port: parseInt(process.env.DB_PORT || '1433', 10),
     pool: {
@@ -18,7 +18,7 @@ const dbConfig = {
         encrypt: process.env.DB_ENCRYPT ? process.env.DB_ENCRYPT === 'true' : true, // Default true for security (Azure)
         trustServerCertificate: process.env.DB_TRUST_CERT
             ? process.env.DB_TRUST_CERT === 'true'
-            : process.env.NODE_ENV === 'development' // Confiar en local si es desarrollo
+            : process.env.NODE_ENV === 'development' 
     }
 };
 

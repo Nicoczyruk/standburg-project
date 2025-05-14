@@ -4,9 +4,7 @@ const arqueoQueries = require('../db/queries/arqueo.queries'); // Para obtener a
 
 const crear = async (req, res, next) => {
     const { tipo_movimiento, descripcion, monto, fecha, metodo_pago_afectado } = req.body;
-    // const admin_id = req.user?.admin_id; // Cuando tengas autenticación
-
-    // Validaciones
+   
     if (!tipo_movimiento || !movimientoQueries.TIPOS_MOVIMIENTO_VALIDOS.includes(tipo_movimiento)) {
         return res.status(400).json({ message: `El campo "tipo_movimiento" es obligatorio y debe ser: ${movimientoQueries.TIPOS_MOVIMIENTO_VALIDOS.join(', ')}.` });
     }
@@ -39,7 +37,7 @@ const crear = async (req, res, next) => {
             monto: parseFloat(monto),
             metodo_pago_afectado: metodo_pago_afectado || null,
             arqueo_id: arqueo_id_actual
-            // admin_id: admin_id // Añadir si se implementa
+            
         };
 
         const nuevoMovimiento = await movimientoQueries.createMovimientoCaja(movimientoData);
@@ -70,7 +68,6 @@ const obtenerTodos = async (req, res, next) => {
     if (tipo_movimiento) {
         filters.tipo_movimiento = tipo_movimiento;
     }
-    // Podrías añadir más filtros (ej. arqueo_id) si el frontend los necesitara
 
     try {
         const movimientos = await movimientoQueries.getAllMovimientosCaja(filters);

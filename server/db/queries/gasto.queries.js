@@ -6,11 +6,6 @@ const TIPOS_GASTO_VALIDOS = ['fijo', 'variable']; // Para validación
 
 /**
  * Obtiene todos los gastos, opcionalmente filtrados.
- * Columnas como turno_id, admin_id_registro, notas_adicionales han sido removidas
- * de la tabla GASTOS (g) ya que no existen según tu DDL.
- * Los LEFT JOINs se mantienen por si quieres reintroducir esas columnas en GASTOS
- * y asociarlas, pero actualmente no se seleccionarán datos de TURNOS o ADMIN
- * directamente a través de GASTOS g, más allá de lo que exista en g.
  */
 const getAllGastos = async (filters = {}) => {
     try {
@@ -80,8 +75,8 @@ const getGastoById = async (id) => {
 
 /**
  * Crea un nuevo gasto.
- * La tabla GASTOS, según tu DDL, no tiene turno_id, admin_id_registro, ni notas_adicionales.
- * Estos campos han sido removidos del INSERT.
+ * 
+ * 
  * @param {object} gastoData - Datos del gasto { tipo_gasto, concepto, monto }.
  */
 const createGasto = async ({ tipo_gasto, concepto, monto }) => {
@@ -98,7 +93,7 @@ const createGasto = async ({ tipo_gasto, concepto, monto }) => {
         );
         const nuevoGasto = result.recordset[0];
         if (nuevoGasto) {
-            // getGastoById ya no necesita hacer JOINs complejos si las columnas no están en GASTOS
+            
             return await getGastoById(nuevoGasto.gasto_id);
         }
         return null;
@@ -118,7 +113,7 @@ const createGasto = async ({ tipo_gasto, concepto, monto }) => {
 
 /**
  * Actualiza un gasto existente.
- * Removidas las columnas que no existen en tu DDL de GASTOS.
+ 
  * @param {number} id - ID del gasto a actualizar.
  * @param {object} gastoData - Datos a actualizar { tipo_gasto, concepto, monto }.
  */
