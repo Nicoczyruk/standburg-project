@@ -1,137 +1,169 @@
 import React, { useState, useEffect } from 'react';
-import './TomaPedidos.css'; // Asegúrate que el CSS exista y esté bien
+import './tomaPedidos.css'; 
 
-const TomaPedidos = ({ cambiarVista }) => {
+const TomaPedidos = () => {
   // --- Estados ---
-  const [tipoPedido, setTipoPedido] = useState('');
-  const [cliente, setCliente] = useState({ nombre: '', telefono: '', direccion: '', costoEnvio: '' });
-  const [carrito, setCarrito] = useState({});
-  const [productosDisponibles, setProductosDisponibles] = useState([]);
+  const [categorias, setCategorias] = useState([]);
+  const [productos, setProductos] = useState([]);
+  const [productosFiltrados, setProductosFiltrados] = useState([]);
+
+  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState(''); 
+  const [carrito, setCarrito] = useState({}); 
+
+  const [tipoPedido, setTipoPedido] = useState('mostrador'); 
+
+  
+  const [formCliente, setFormCliente] = useState({
+    nombre: '',
+    telefono: '',
+    pago: 'efectivo',
+    direccion: '',
+    correo: '',
+    comentario: '',
+  });
+
+  const [loadingCategorias, setLoadingCategorias] = useState(true);
   const [loadingProductos, setLoadingProductos] = useState(true);
   const [error, setError] = useState(null);
   const [submitError, setSubmitError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [metodoPago, setMetodoPago] = useState('efectivo'); // <-- NUEVO ESTADO para método de pago
+  const [modalVisible, setModalVisible] = useState(false);
 
-  // --- Cargar Productos Disponibles ---
   useEffect(() => {
+    const fetchCategorias = async () => {
+      setLoadingCategorias(true);
+      try {
+        const response = await fetch('/api/categorias');
+        if (!response.ok) throw new Error('Error al cargar categorías');
+        const data = await response.json();
+        setCategorias(data || []);
+        if (data && data.length > 0) {
+          setCategoriaSeleccionada(data[0].categoria_id);
+        }
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoadingCategorias(false);
+      }
+    };
+
     const fetchProductos = async () => {
       setLoadingProductos(true);
-      setError(null);
       try {
         const response = await fetch('/api/productos');
-        if (!response.ok) {
-          const errData = await response.json().catch(() => ({}));
-          throw new Error(`Error ${response.status}: ${errData.message || response.statusText}`);
-        }
+        if (!response.ok) throw new Error('Error al cargar productos');
         const data = await response.json();
-        setProductosDisponibles(data || []);
+        setProductos(data || []);
       } catch (err) {
-        console.error("Error al obtener productos:", err);
-        setError(`Error cargando productos: ${err.message}`);
+        setError(err.message);
       } finally {
         setLoadingProductos(false);
       }
     };
+
+    fetchCategorias();
     fetchProductos();
   }, []);
 
-  // --- Manejar Cambios en Datos del Cliente ---
-  const handleChangeCliente = (e) => {
-    const { name, value } = e.target;
-    const processedValue = name === 'costoEnvio'
-      ? (value === '' ? '' : parseFloat(value) || 0)
-      : value;
-    setCliente(prev => ({ ...prev, [name]: processedValue }));
-  };
+  useEffect(() => {
+    if (categoriaSeleccionada) {
+      setProductosFiltrados(productos.filter(p => p.categoria_id === parseInt(categoriaSeleccionada)));
+    } else {
+      setProductosFiltrados(productos);
+    }
+  }, [categoriaSeleccionada, productos]);
 
-  // --- Agregar Producto al Carrito ---
-  const agregarProductoAlCarrito = (producto) => {
-    setCarrito(prevCarrito => {
-      const existente = prevCarrito[producto.producto_id];
+  // --- Carrito ---
+  const agregarAlCarrito = (producto) => {
+    setCarrito(prev => {
+      const existente = prev[producto.producto_id];
       if (existente) {
-        return { ...prevCarrito, [producto.producto_id]: { ...existente, cantidad: existente.cantidad + 1 } };
-      } else {
-        return { ...prevCarrito, [producto.producto_id]: { ...producto, cantidad: 1 } };
+        return { ...prev, [producto.producto_id]: { ...existente, cantidad: existente.cantidad + 1 } };
       }
+      return { ...prev, [producto.producto_id]: { ...producto, cantidad: 1 } };
     });
   };
 
-  // --- Cambiar Cantidad en Carrito ---
-  const cambiarCantidadCarrito = (productoId, nuevaCantidad) => {
-    setCarrito(prevCarrito => {
-      const item = prevCarrito[productoId];
-      if (!item) return prevCarrito;
+  const cambiarCantidad = (productoId, delta) => {
+    setCarrito(prev => {
+      const itemActual = prev[productoId];
+      if (!itemActual) return prev;
+      const nuevaCantidad = itemActual.cantidad + delta;
       if (nuevaCantidad <= 0) {
-        const { [productoId]: _, ...resto } = prevCarrito;
+        const { [productoId]: _, ...resto } = prev;
         return resto;
-      } else {
-        return { ...prevCarrito, [productoId]: { ...item, cantidad: nuevaCantidad } };
       }
+      return { ...prev, [productoId]: { ...itemActual, cantidad: nuevaCantidad } };
     });
   };
 
-  // --- Limpiar Estado ---
-  const limpiarFormulario = () => {
-    setTipoPedido('');
-    setCliente({ nombre: '', telefono: '', direccion: '', costoEnvio: '' });
+  const eliminarDelCarrito = (productoId) => {
+    setCarrito(prev => {
+      const { [productoId]: _, ...resto } = prev;
+      return resto;
+    });
+  };
+
+  const totalCarrito = Object.values(carrito).reduce((acc, p) => acc + (p.precio * p.cantidad), 0);
+
+  const handleChangeFormCliente = (e) => {
+    setFormCliente({ ...formCliente, [e.target.name]: e.target.value });
+  };
+
+  const limpiarTodo = () => {
     setCarrito({});
-    setMetodoPago('efectivo'); // Resetear método de pago
+    setFormCliente({ nombre: '', telefono: '', pago: 'efectivo', direccion: '', correo: '', comentario: '' });
+    setTipoPedido('mostrador');
     setError(null);
     setSubmitError(null);
     setIsSubmitting(false);
+    setModalVisible(false);
   };
 
-  // --- Confirmar y Enviar Pedido (POST /api/pedidos) ---
-  const confirmarPedido = async () => {
+  const handleSubmitPedido = async (e) => {
+    e.preventDefault();
     setSubmitError(null);
     setIsSubmitting(true);
 
-    const itemsParaEnviar = Object.values(carrito).map(item => ({
-      producto_id: item.producto_id,
-      cantidad: item.cantidad,
-    }));
-
-    if (itemsParaEnviar.length === 0) {
-      setSubmitError("El pedido debe contener al menos un producto.");
+    if (!formCliente.nombre.trim()) {
+      setSubmitError('El nombre es obligatorio.');
       setIsSubmitting(false);
       return;
     }
-    if (!tipoPedido) {
-         setSubmitError("Debe seleccionar un tipo de pedido.");
-         setIsSubmitting(false);
-         return;
+
+    if (tipoPedido === 'delivery' && !formCliente.direccion.trim()) {
+      setSubmitError('La dirección es obligatoria para delivery.');
+      setIsSubmitting(false);
+      return;
     }
-    if (!metodoPago) { // Validación para el nuevo campo
-        setSubmitError("Debe seleccionar un método de pago.");
-        setIsSubmitting(false);
-        return;
+
+    if (Object.keys(carrito).length === 0) {
+      setSubmitError('El carrito está vacío.');
+      setIsSubmitting(false);
+      return;
     }
-    const mesaIdParsed = cliente.mesa_id ? parseInt(cliente.mesa_id) : null;
-    if (tipoPedido === 'mesa' && (!mesaIdParsed || mesaIdParsed <= 0) ) {
-         setSubmitError("Debe seleccionar una mesa válida para pedidos de tipo 'mesa'.");
-         setIsSubmitting(false);
-         return;
+
+    if (!formCliente.pago) {
+      setSubmitError('Debe seleccionar un método de pago.');
+      setIsSubmitting(false);
+      return;
     }
-     if (tipoPedido === 'delivery' && !cliente.direccion) {
-        setSubmitError("La dirección es obligatoria para pedidos de tipo 'delivery'.");
-        setIsSubmitting(false);
-        return;
-     }
+
+    const itemsParaEnviar = Object.values(carrito).map(item => ({
+      producto_id: item.producto_id,
+      cantidad: item.cantidad
+    }));
 
     const payload = {
-      mesa_id: tipoPedido === 'mesa' ? mesaIdParsed : null,
       tipo: tipoPedido,
-      cliente_nombre: cliente.nombre || null,
-      cliente_telefono: cliente.telefono || null,
-      cliente_direccion: cliente.direccion || null,
-      notas: null,
+      cliente_nombre: formCliente.nombre.trim(),
+      cliente_telefono: formCliente.telefono.trim() || null,
+      cliente_direccion: tipoPedido === 'delivery' ? formCliente.direccion.trim() : null,
+      notas: formCliente.comentario.trim() || null,
       items: itemsParaEnviar,
-      estadoInicial: 'PENDIENTE', // El backend se encargará del estado del pago
-      metodo_pago: metodoPago // <-- AÑADIDO metodo_pago
+      mesa_id: null, 
+      metodo_pago: formCliente.pago
     };
-
-    console.log("Enviando payload a /api/pedidos:", JSON.stringify(payload, null, 2));
 
     try {
       const response = await fetch('/api/pedidos', {
@@ -141,144 +173,225 @@ const TomaPedidos = ({ cambiarVista }) => {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: response.statusText }));
+        const errorData = await response.json().catch(() => ({}));
         throw new Error(`Error ${response.status}: ${errorData.message || 'No se pudo crear el pedido'}`);
       }
 
       const pedidoCreado = await response.json();
-      console.log('Pedido creado exitosamente:', pedidoCreado);
-      alert(`Pedido #${pedidoCreado.pedido_id} creado exitosamente con método de pago: ${metodoPago}!`);
-      limpiarFormulario();
-
+      console.log('Pedido creado:', pedidoCreado);
+      setModalVisible(true);
     } catch (err) {
-      console.error("Error al confirmar pedido:", err);
-      setSubmitError(`Error al crear pedido: ${err.message}`);
+      setSubmitError(`Error: ${err.message}`);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // --- Cálculos ---
-  const carritoArray = Object.values(carrito);
-  const subtotal = carritoArray.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
-  const costoEnvioNumerico = typeof cliente.costoEnvio === 'number' ? cliente.costoEnvio : 0;
-  const total = subtotal + costoEnvioNumerico;
+  const cerrarModalYLimpiar = () => {
+    setModalVisible(false);
+    limpiarTodo();
+  };
 
-  // --- Renderizado ---
-  if (loadingProductos) return <p>Cargando productos...</p>;
-  if (error && !productosDisponibles.length) return <p style={{ color: 'red' }}>{error}</p>;
+  if (loadingCategorias || loadingProductos) {
+    return <div className="pedido-cliente-container"><h1>Toma de Pedidos</h1><p>Cargando...</p></div>;
+  }
+
+  if (error) {
+    return <div className="pedido-cliente-container"><h1>Toma de Pedidos</h1><p style={{color: 'red'}}>{error}</p></div>;
+  }
+
+  const carritoArray = Object.values(carrito);
 
   return (
-    <div className="toma-pedidos-container">
-      <h1>Tomar Pedido</h1>
-
-      <select value={tipoPedido} onChange={(e) => setTipoPedido(e.target.value)} disabled={isSubmitting}>
-        <option value="" disabled>-- Seleccionar Tipo --</option>
-        <option value="mostrador">Mostrador</option>
-        <option value="mesa">Mesa</option>
-        <option value="delivery">Delivery</option>
-      </select>
-
-      {(tipoPedido === 'mostrador' || tipoPedido === 'mesa' || tipoPedido === 'delivery') && (
-        <div className="form-cliente">
+    <div className="pedido-cliente-container">
+      <header className="pedido-cliente-header">
+        <h1>Toma de Pedidos</h1>
+        { <div className="tipo-pedido">
           <input
-            type="text" name="nombre" placeholder="Nombre Cliente"
-            value={cliente.nombre} onChange={handleChangeCliente} disabled={isSubmitting}
+            type="checkbox"
+            id="pedido-toggle"
+            checked={tipoPedido === 'delivery'}
+            onChange={() => setTipoPedido(tipoPedido === 'mostrador' ? 'delivery' : 'mostrador')}
+            disabled={isSubmitting}
           />
-          {tipoPedido === 'mesa' && (
-             <input
-               type="number" name="mesa_id" placeholder="ID Mesa"
-               value={cliente.mesa_id || ''} onChange={handleChangeCliente} disabled={isSubmitting}
-             />
-          )}
-          {(tipoPedido === 'mostrador' || tipoPedido === 'delivery') && (
-            <input
-              type="text" name="telefono" placeholder="Teléfono"
-              value={cliente.telefono} onChange={handleChangeCliente} disabled={isSubmitting}
-            />
-          )}
-          {tipoPedido === 'delivery' && (
-            <>
-              <input
-                type="text" name="direccion" placeholder="Dirección"
-                value={cliente.direccion} onChange={handleChangeCliente} disabled={isSubmitting}
-              />
-              <input
-                type="number" name="costoEnvio" placeholder="Costo de Envío"
-                step="0.01"
-                value={cliente.costoEnvio} onChange={handleChangeCliente} disabled={isSubmitting}
-              />
-            </>
-          )}
-        </div>
-      )}
+          <label htmlFor="pedido-toggle" className="switch">
+            <span className="switch-label" data-on="Delivery" data-off="Mostrador"></span>
+            <span className="switch-button"></span>
+          </label>
+        </div> }
+      </header>
 
-      <h2>Productos Disponibles</h2>
-      {error && !loadingProductos && <p style={{ color: 'orange' }}>Advertencia: {error}</p>}
-      <div className="productos-rapidos">
-        {productosDisponibles.length > 0 ? (
-          productosDisponibles.map((prod) => (
-            <button key={prod.producto_id} onClick={() => agregarProductoAlCarrito(prod)} disabled={isSubmitting}>
-              {prod.nombre} - ${prod.precio.toFixed(2)}
-            </button>
-          ))
-        ) : (
-          <p>No hay productos disponibles.</p>
-        )}
-      </div>
-
-      <h2>Pedido Actual</h2>
-      {carritoArray.length === 0 ? (
-        <p>Agrega productos al pedido.</p>
-      ) : (
-        <ul className="lista-productos-pedido">
-          {carritoArray.map((item) => (
-            <li key={item.producto_id} className="carrito-item-toma">
-              <span>{item.nombre} (${item.precio.toFixed(2)})</span>
-              <div className="controles-cantidad">
-                <button type="button" onClick={() => cambiarCantidadCarrito(item.producto_id, item.cantidad - 1)} disabled={isSubmitting}>-</button>
-                <span>{item.cantidad}</span>
-                <button type="button" onClick={() => cambiarCantidadCarrito(item.producto_id, item.cantidad + 1)} disabled={isSubmitting}>+</button>
-              </div>
-              <span>Subtotal: ${(item.precio * item.cantidad).toFixed(2)}</span>
-              <button type="button" className="eliminar-item" onClick={() => cambiarCantidadCarrito(item.producto_id, 0)} disabled={isSubmitting}>X</button>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {/* Totales, Método de Pago y Confirmación */}
-      <div className="totales">
-        <p>Subtotal: ${subtotal.toFixed(2)}</p>
-        {tipoPedido === 'delivery' && cliente.costoEnvio !== '' && <p>Envío: ${costoEnvioNumerico.toFixed(2)}</p>}
-        <h3>Total: ${total.toFixed(2)}</h3>
-
-        {/* NUEVO SELECTOR para Método de Pago */}
-        <div className="metodo-pago-selector">
-            <label htmlFor="metodoPago">Método de Pago: </label>
-            <select
-                id="metodoPago"
-                value={metodoPago}
-                onChange={(e) => setMetodoPago(e.target.value)}
-                disabled={isSubmitting}
-            >
-                <option value="efectivo">Efectivo</option>
-                <option value="transferencia">Transferencia</option>
-                <option value="tarjeta_credito">Tarjeta de Crédito</option>
-                <option value="tarjeta_debito">Tarjeta de Débito</option>
-            </select>
-        </div>
-
-        {submitError && <p style={{ color: 'red' }}>{submitError}</p>}
-        <button onClick={confirmarPedido} disabled={isSubmitting || carritoArray.length === 0 || !tipoPedido || !metodoPago}>
-          {isSubmitting ? 'Confirmando...' : 'Confirmar Pedido'}
+      <div className="categorias">
+        {categorias.map(cat => (
+          <button
+            key={cat.categoria_id}
+            className={`categoria-btn
+            ${categoriaSeleccionada === cat.categoria_id ? 'categoria-activa' : ''}`}
+            onClick={() => setCategoriaSeleccionada(cat.categoria_id)}
+            disabled={isSubmitting}
+          >
+        {cat.nombre}
         </button>
-         <button type="button" onClick={limpiarFormulario} disabled={isSubmitting} style={{ marginLeft: '10px', backgroundColor: '#555' }}>
-           Limpiar
-         </button>
+        ))}
+      </div>
+      
+  <div className="productos">
+    {productosFiltrados.length === 0 && <p>No hay productos en esta categoría.</p>}
+    {productosFiltrados.map(prod => (
+      <div
+        key={prod.producto_id}
+        className="producto-card"
+        onClick={() => agregarAlCarrito(prod)}
+        tabIndex={0}
+        role="button"
+        onKeyDown={e => { if (e.key === 'Enter') agregarAlCarrito(prod); }}
+        aria-label={`Agregar ${prod.nombre} al carrito`}
+      >
+        <img src={prod.imagen_url} alt={prod.nombre} />
+        <div className="producto-info">
+          <h3>{prod.nombre}</h3>
+          <p>${prod.precio.toFixed(2)}</p>
+        </div>
+      </div>
+    ))}
+  </div>
+
+  <div className="pedido-footer">
+    <section className="carrito">
+      <h2>Carrito</h2>
+      {carritoArray.length === 0 ? (
+        <p>El carrito está vacío.</p>
+      ) : (
+        carritoArray.map(item => (
+          <div key={item.producto_id} className="carrito-item">
+            <span>{item.nombre}</span>
+            <span>
+              <button
+                onClick={() => cambiarCantidad(item.producto_id, -1)}
+                aria-label={`Disminuir cantidad de ${item.nombre}`}
+                disabled={isSubmitting}
+              >-</button>
+              <strong>{item.cantidad}</strong>
+              <button
+                onClick={() => cambiarCantidad(item.producto_id, 1)}
+                aria-label={`Aumentar cantidad de ${item.nombre}`}
+                disabled={isSubmitting}
+              >+</button>
+            </span>
+            <span>${(item.precio * item.cantidad).toFixed(2)}</span>
+            <button
+              onClick={() => eliminarDelCarrito(item.producto_id)}
+              aria-label={`Eliminar ${item.nombre} del carrito`}
+              disabled={isSubmitting}
+            >×</button>
+          </div>
+        ))
+      )}
+      <div className="total">
+        Total: ${totalCarrito.toFixed(2)}
+      </div>
+    </section>
+
+    <aside className="form-cliente">
+      <h2>Datos del Cliente</h2>
+      <form onSubmit={handleSubmitPedido} noValidate>
+        <label htmlFor="nombre">Nombre *</label>
+        <input
+          id="nombre"
+          name="nombre"
+          type="text"
+          value={formCliente.nombre}
+          onChange={handleChangeFormCliente}
+          required
+          disabled={isSubmitting}
+          autoComplete="name"
+        />
+
+        <label htmlFor="telefono">Teléfono</label>
+        <input
+          id="telefono"
+          name="telefono"
+          type="tel"
+          value={formCliente.telefono}
+          onChange={handleChangeFormCliente}
+          disabled={isSubmitting}
+          autoComplete="tel"
+        />
+
+        {/* Si usas delivery, mostrar dirección */}
+        {tipoPedido === 'delivery' && (
+          <>
+            <label htmlFor="direccion">Dirección *</label>
+            <input
+              id="direccion"
+              name="direccion"
+              type="text"
+              value={formCliente.direccion}
+              onChange={handleChangeFormCliente}
+              required={tipoPedido === 'delivery'}
+              disabled={isSubmitting}
+              autoComplete="address-line1"
+            />
+          </>
+        )}
+
+        <label htmlFor="correo">Correo electrónico</label>
+        <input
+          id="correo"
+          name="correo"
+          type="email"
+          value={formCliente.correo}
+          onChange={handleChangeFormCliente}
+          disabled={isSubmitting}
+          autoComplete="email"
+        />
+
+        <label htmlFor="pago">Método de pago *</label>
+        <select
+          id="pago"
+          name="pago"
+          value={formCliente.pago}
+          onChange={handleChangeFormCliente}
+          disabled={isSubmitting}
+          required
+        >
+          <option value="efectivo">Efectivo</option>
+          <option value="tarjeta">Tarjeta</option>
+          <option value="transferencia">Transferencia</option>
+        </select>
+
+        <label htmlFor="comentario">Comentario</label>
+        <textarea
+          id="comentario"
+          name="comentario"
+          value={formCliente.comentario}
+          onChange={handleChangeFormCliente}
+          disabled={isSubmitting}
+        ></textarea>
+
+        {submitError && <p className="error-submit" role="alert">{submitError}</p>}
+
+        <button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'Enviando...' : 'Enviar Pedido'}
+        </button>
+      </form>
+    </aside>
+  </div>
+
+  {/* Modal de éxito */}
+  {modalVisible && (
+    <div className="modal-exito" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
+      <div className="modal-contenido">
+        <h2 id="modal-titulo">Pedido enviado con éxito</h2>
+        <p>Gracias por tu pedido. Nos pondremos en contacto pronto.</p>
+        <button onClick={cerrarModalYLimpiar} autoFocus>
+          Cerrar
+        </button>
       </div>
     </div>
-  );
+  )}
+</div>
+);
 };
 
 export default TomaPedidos;

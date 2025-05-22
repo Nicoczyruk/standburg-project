@@ -1,84 +1,77 @@
 .main-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   background-color: #1e1e2f;
-  padding: 1rem 2rem;
+  padding: 1rem;
   color: white;
-  font-family: 'Poppins', sans-serif;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
 }
 
 .logo {
   display: flex;
   align-items: center;
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: #ff3b3f;
+  margin-bottom: 1rem;
 }
 
 .logo-img {
   height: 80px;
-  width: auto;
-  margin-right: 12px;
 }
 
-.nav-menu {
+.card-menu {
   display: flex;
-  gap: 2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.card {
+  background-color: #6e0000;
+  width: 120px;
+  height: 100px;
+  padding: 1rem;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-}
-
-.nav-menu span,
-.nav-menu a {
-  color: white;
-  text-decoration: none;
+  justify-content: center;
+  gap: 0.5rem;
   cursor: pointer;
-  font-size: 1.1rem;
-  position: relative;
-  transition: color 0.3s;
+  transition: transform 0.2s ease, background-color 0.3s ease;
+  text-align: center;
 }
 
-.nav-menu span:hover,
-.nav-menu a:hover {
-  color: #ff3b3f;
-}
-
-/* Dropdown */
-.dropdown {
-  position: relative;
-}
-
-.dropdown-content {
-  display: none;
-  position: absolute;
-  top: 110%;
-  left: 0;
-  background-color: #2e2e3e;
-  min-width: 160px;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-  z-index: 500;
-}
-
-.dropdown-content span {
-  display: block;
-  padding: 0.8rem 1rem;
-  color: white;
-  background-color: #2e2e3e;
-  font-size: 1rem;
-  transition: background 0.3s, color 0.3s;
-}
-
-.dropdown-content span:hover {
+.card:hover {
   background-color: #ff3b3f;
-  color: #fff;
+  transform: scale(1.05);
 }
 
-.dropdown:hover .dropdown-content {
-  display: block;
+.card .icon {
+  font-size: 28px;
+  color: #ffffff; 
+}
+
+.card span {
+  font-size: 13px;
+  font-weight: 500;
+  color: white;
+}
+
+/* Media queries para pantallas más pequeñas */
+@media (max-width: 768px) {
+  .card {
+    width: 45%;
+    height: 110px;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    width: 100%;
+    height: 100px;
+  }
+
+  .card .icon {
+    font-size: 24px;
+  }
+
+  .card span {
+    font-size: 12px;
+  }
 }

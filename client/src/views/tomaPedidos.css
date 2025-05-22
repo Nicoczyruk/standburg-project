@@ -1,56 +1,167 @@
-.toma-pedidos-container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
+:root {
+  --primary-color: #2a9df4;
+  --secondary-color: #f0f8ff;
+  --accent-color: #e0f0ff;
+  --text-color: #333;
+  --muted-color: #777;
 }
 
-.toma-pedidos-container h1 {
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f9fbfd;
+  color: var(--text-color);
+}
+
+.toma-pedidos {
+  padding: 2rem;
+  max-width: 900px;
+  margin: auto;
+}
+
+.titulo-principal {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 2rem;
+  color: var(--primary-color);
+  font-size: 2rem;
 }
 
-.form-cliente, .form-productos {
-  margin-bottom: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+.card-toma {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.06);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  transition: box-shadow 0.3s ease;
 }
 
-input, select, button {
-  padding: 10px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+.card-toma:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
-button {
-  background-color: #ff3b3b;
-  color: white;
-  border: none;
+.card-toma h2 {
+  margin-bottom: 1rem;
+  color: var(--text-color);
+}
+
+.categoria-titulo {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+  color: var(--muted-color);
+  border-bottom: 2px solid #eee;
+  padding-bottom: 0.3rem;
+}
+
+.productos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1rem;
+}
+
+.productos-grid button {
+  background-color: var(--secondary-color);
+  border: 1px solid #cce7ff;
+  border-radius: 8px;
+  padding: 0.8rem;
+  font-weight: bold;
+  color: var(--text-color);
   cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
-button:hover {
-  background-color: #e03434;
+.productos-grid button:hover {
+  background-color: var(--accent-color);
+  transform: scale(1.03);
 }
 
-.lista-productos {
+.lista-carrito {
   list-style: none;
   padding: 0;
 }
 
-.lista-productos li {
-  padding: 10px;
-  margin: 5px 0;
-  background-color: #f5f5f5;
-  border-left: 5px solid #ff3b3b;
-}
-.productos-rapidos {
+.item-carrito {
   display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  gap: 1rem;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 20px;
+  background-color: #f5faff;
+  padding: 0.8rem;
+  border-radius: 8px;
 }
-.productos-rapidos button {
-  flex: 1 0 30%;
+
+.cantidad-controles {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
+
+.cantidad-controles button {
+  width: 30px;
+  height: 30px;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.cantidad-controles button:hover {
+  background-color: #1a8de0;
+}
+
+.mensaje-error {
+  color: red;
+  font-weight: bold;
+  margin-top: 1rem;
+}
+
+.botones-accion {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.botones-accion button {
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: none;
+  background-color: var(--primary-color);
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.botones-accion button:hover {
+  background-color: #1a8de0;
+}
+
+.resumen-total p {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-color);
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .productos-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+
+  .item-carrito {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .cantidad-controles {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
