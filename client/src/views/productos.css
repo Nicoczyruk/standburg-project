@@ -1,46 +1,118 @@
 .productos-container {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
   padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-h1 {
+.titulo {
   text-align: center;
+  margin-bottom: 30px;
+  color: #333;
+}
+
+.card-form {
+  background: #fff;
+  padding: 20px 30px;
+  box-shadow: 0 2px 10px rgb(0 0 0 / 0.1);
+  border-radius: 8px;
+  margin-bottom: 40px;
+}
+
+.card-form h2 {
   margin-bottom: 20px;
+  color: #ff0400;
 }
 
 .form-producto {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 20px;
+  gap: 15px;
 }
 
-input, button {
-  padding: 10px;
-  font-size: 16px;
-  flex: 1 0 30%;
+.form-producto input[type="text"],
+.form-producto input[type="number"],
+.form-producto select,
+.form-producto input[type="file"] {
+  flex: 1 1 180px;
+  padding: 10px 12px;
   border: 1px solid #ccc;
   border-radius: 5px;
+  font-size: 1rem;
+  box-sizing: border-box;
 }
 
-button {
-  background-color: #ff3b3b;
+.form-producto button {
+  flex: 1 1 100%;
+  padding: 12px;
+  background-color: #ff0000;
   color: white;
+  font-weight: 600;
+  border: none;
+  border-radius: 5px;
   cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 10px;
 }
 
-button:hover {
-  background-color: #e03434;
+.form-producto button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.form-producto button:hover:not(:disabled) {
+  background-color: #ff0000;
+}
+
+.error {
+  color: #d93025;
+  margin-top: 8px;
+  font-weight: 600;
+}
+
+/* Tabla productos */
+.tabla-container {
+  overflow-x: auto;
 }
 
 .tabla-productos {
   width: 100%;
   border-collapse: collapse;
+  font-size: 0.9rem;
 }
 
-.tabla-productos th, .tabla-productos td {
-  padding: 10px;
+.tabla-productos thead {
+  background-color: #ff0000;
+  color: white;
+}
+
+.tabla-productos th,
+.tabla-productos td {
+  padding: 12px 15px;
   border: 1px solid #ddd;
-  text-align: center;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.tabla-productos tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.img-producto {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+/* Responsividad */
+@media (max-width: 600px) {
+  .form-producto {
+    flex-direction: column;
+  }
+
+  .form-producto input,
+  .form-producto select,
+  .form-producto
+  button {flex: 1 1 100%;}
 }
