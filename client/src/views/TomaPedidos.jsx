@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import './tomaPedidos.css'; 
 
 const TomaPedidos = () => {
@@ -179,17 +180,13 @@ const TomaPedidos = () => {
 
       const pedidoCreado = await response.json();
       console.log('Pedido creado:', pedidoCreado);
-      setModalVisible(true);
+      toast.success('¡Pedido realizado correctamente!');
+      limpiarTodo();    
     } catch (err) {
       setSubmitError(`Error: ${err.message}`);
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const cerrarModalYLimpiar = () => {
-    setModalVisible(false);
-    limpiarTodo();
   };
 
   if (loadingCategorias || loadingProductos) {
@@ -235,162 +232,77 @@ const TomaPedidos = () => {
         ))}
       </div>
       
-  <div className="productos">
-    {productosFiltrados.length === 0 && <p>No hay productos en esta categoría.</p>}
-    {productosFiltrados.map(prod => (
-      <div
-        key={prod.producto_id}
-        className="producto-card"
-        onClick={() => agregarAlCarrito(prod)}
-        tabIndex={0}
-        role="button"
-        onKeyDown={e => { if (e.key === 'Enter') agregarAlCarrito(prod); }}
-        aria-label={`Agregar ${prod.nombre} al carrito`}
-      >
-        <img src={prod.imagen_url} alt={prod.nombre} />
-        <div className="producto-info">
-          <h3>{prod.nombre}</h3>
-          <p>${prod.precio.toFixed(2)}</p>
-        </div>
-      </div>
-    ))}
-  </div>
-
-  <div className="pedido-footer">
-    <section className="carrito">
-      <h2>Carrito</h2>
-      {carritoArray.length === 0 ? (
-        <p>El carrito está vacío.</p>
-      ) : (
-        carritoArray.map(item => (
-          <div key={item.producto_id} className="carrito-item">
-            <span>{item.nombre}</span>
-            <span>
-              <button
-                onClick={() => cambiarCantidad(item.producto_id, -1)}
-                aria-label={`Disminuir cantidad de ${item.nombre}`}
-                disabled={isSubmitting}
-              >-</button>
-              <strong>{item.cantidad}</strong>
-              <button
-                onClick={() => cambiarCantidad(item.producto_id, 1)}
-                aria-label={`Aumentar cantidad de ${item.nombre}`}
-                disabled={isSubmitting}
-              >+</button>
-            </span>
-            <span>${(item.precio * item.cantidad).toFixed(2)}</span>
-            <button
-              onClick={() => eliminarDelCarrito(item.producto_id)}
-              aria-label={`Eliminar ${item.nombre} del carrito`}
-              disabled={isSubmitting}
-            >×</button>
-          </div>
-        ))
-      )}
-      <div className="total">
-        Total: ${totalCarrito.toFixed(2)}
-      </div>
-    </section>
-
-    <aside className="form-cliente">
-      <h2>Datos del Cliente</h2>
-      <form onSubmit={handleSubmitPedido} noValidate>
-        <label htmlFor="nombre">Nombre *</label>
-        <input
-          id="nombre"
-          name="nombre"
-          type="text"
-          value={formCliente.nombre}
-          onChange={handleChangeFormCliente}
-          required
-          disabled={isSubmitting}
-          autoComplete="name"
-        />
-
-        <label htmlFor="telefono">Teléfono</label>
-        <input
-          id="telefono"
-          name="telefono"
-          type="tel"
-          value={formCliente.telefono}
-          onChange={handleChangeFormCliente}
-          disabled={isSubmitting}
-          autoComplete="tel"
-        />
-
-        {/* Si usas delivery, mostrar dirección */}
-        {tipoPedido === 'delivery' && (
-          <>
-            <label htmlFor="direccion">Dirección *</label>
-            <input
-              id="direccion"
-              name="direccion"
-              type="text"
-              value={formCliente.direccion}
-              onChange={handleChangeFormCliente}
-              required={tipoPedido === 'delivery'}
-              disabled={isSubmitting}
-              autoComplete="address-line1"
-            />
-          </>
-        )}
-
-        <label htmlFor="correo">Correo electrónico</label>
-        <input
-          id="correo"
-          name="correo"
-          type="email"
-          value={formCliente.correo}
-          onChange={handleChangeFormCliente}
-          disabled={isSubmitting}
-          autoComplete="email"
-        />
-
-        <label htmlFor="pago">Método de pago *</label>
-        <select
-          id="pago"
-          name="pago"
-          value={formCliente.pago}
-          onChange={handleChangeFormCliente}
-          disabled={isSubmitting}
-          required
-        >
-          <option value="efectivo">Efectivo</option>
-          <option value="tarjeta">Tarjeta</option>
-          <option value="transferencia">Transferencia</option>
-        </select>
-
-        <label htmlFor="comentario">Comentario</label>
-        <textarea
-          id="comentario"
-          name="comentario"
-          value={formCliente.comentario}
-          onChange={handleChangeFormCliente}
-          disabled={isSubmitting}
-        ></textarea>
-
-        {submitError && <p className="error-submit" role="alert">{submitError}</p>}
-
-        <button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Enviando...' : 'Enviar Pedido'}
-        </button>
-      </form>
-    </aside>
-  </div>
-
-  {/* Modal de éxito */}
-  {modalVisible && (
-    <div className="modal-exito" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
-      <div className="modal-contenido">
-        <h2 id="modal-titulo">Pedido enviado con éxito</h2>
-        <p>Gracias por tu pedido. Nos pondremos en contacto pronto.</p>
-        <button onClick={cerrarModalYLimpiar} autoFocus>
-          Cerrar
-        </button>
+<div className="productos">
+  {productosFiltrados.length === 0 && <p>No hay productos en esta categoría.</p>}
+  {productosFiltrados.map(prod => (
+    <div
+      key={prod.producto_id}
+      className="producto-card"
+      onClick={() => agregarAlCarrito(prod)}
+      tabIndex={0}
+      role="button"
+      onKeyDown={e => { if (e.key === 'Enter') agregarAlCarrito(prod); }}
+      aria-label={`Agregar ${prod.nombre} al carrito`}
+    >
+      <img
+        src={`/ImagenesProductos/${prod.producto_id}.jpg`}
+        alt={prod.nombre}
+      />
+      <div className="producto-info">
+        <h3>{prod.nombre}</h3>
+        <p>${prod.precio.toFixed(2)}</p>
       </div>
     </div>
-  )}
+  ))}
 </div>
+
+
+  <div className="pedido-footer">
+         <aside className="carrito" aria-label="Carrito de compra">
+        <h2>Mi Pedido</h2>
+        {carritoArray.length === 0 ? (
+          <p>Tu carrito está vacío.</p>
+        ) : (
+          carritoArray.map(item => (
+            <div key={item.producto_id} className="carrito-item">
+              <span>{item.nombre} (${item.precio.toFixed(2)})</span>
+              <div className="controles-cantidad">
+                <button onClick={() => cambiarCantidad(item.producto_id, -1)} disabled={isSubmitting}>-</button>
+                <span>{item.cantidad}</span>
+                <button onClick={() => cambiarCantidad(item.producto_id, 1)} disabled={isSubmitting}>+</button>
+              </div>
+              <span>${(item.precio * item.cantidad).toFixed(2)}</span>
+              <button className="eliminar-item-cliente" onClick={() => eliminarDelCarrito(item.producto_id)} disabled={isSubmitting} aria-label={`Eliminar ${item.nombre} del carrito`}>X</button>
+            </div>
+          ))
+        )}
+        <p className="total-carrito-cliente">Total: ${totalCarrito.toFixed(2)}</p>
+
+        <form className="formulario-pedido" onSubmit={handleSubmitPedido}>
+          <input name="nombre" placeholder="Nombre Completo*" value={formCliente.nombre} onChange={handleChangeFormCliente} required disabled={isSubmitting} />
+          <input name="telefono" type="tel" placeholder="Teléfono" value={formCliente.telefono} onChange={handleChangeFormCliente} disabled={isSubmitting} />
+
+          {tipoPedido === 'delivery' && (
+            <input name="direccion" placeholder="Dirección Completa*" value={formCliente.direccion} onChange={handleChangeFormCliente} required disabled={isSubmitting} />
+          )}
+
+          <select name="pago" value={formCliente.pago} onChange={handleChangeFormCliente} required disabled={isSubmitting}>
+            <option value="efectivo">Efectivo</option>
+            <option value="transferencia">Transferencia</option>
+            <option value="tarjeta_credito">Tarjeta de Crédito</option>
+            <option value="tarjeta_debito">Tarjeta de Débito</option>
+          </select>
+         <textarea name="comentario" placeholder="Comentario Adicional (Opcional)" value={formCliente.comentario} onChange={handleChangeFormCliente} disabled={isSubmitting} style={{ resize: 'none' }}/>
+
+          {submitError && <p className="error-text">{submitError}</p>}
+
+          <button type="submit" disabled={isSubmitting || carritoArray.length === 0}>
+            {isSubmitting ? 'Enviando Pedido...' : 'Confirmar pedido'}
+          </button>
+        </form>
+      </aside>
+    </div>
+  </div>
 );
 };
 

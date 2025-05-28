@@ -202,8 +202,8 @@ const Productos = () => {
                   <tr key={p.producto_id}>
                     <td>
                       {p.imagen_url ? (
-                        <img src={p.imagen_url} alt={p.nombre} className="img-producto" />
-                      ) : (
+                      <img src={`/ImagenesProductos/${prod.producto_id}.jpg`} alt={prod.nombre}/>                      
+                        ) : (
                         <span>No image</span>
                       )}
                     </td>

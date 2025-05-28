@@ -56,3 +56,29 @@ button:hover {
   font-size: 1.2rem;
   font-weight: bold;
 }
+
+.mi-toast-exito {
+  background-color: #4caf50;
+  color: white;
+  font-weight: bold;
+  border-radius: 8px;
+}
+
+.mi-toast-body {
+  font-size: 1rem;
+}
+
+.mi-toast-progress {
+  background: white;
+}
+
+.Toastify__close-button {
+  color: white !important;
+  background-color: transparent !important;
+  font-size: 18px !important;
+  opacity: 1 !important;
+}
+
+.Toastify__close-button:hover {
+  color: red !important;
+}

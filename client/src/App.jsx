@@ -12,6 +12,8 @@ import MovimientoCaja from './views/MovimientoCaja';
 import Gastos from './views/Gastos';
 import PedidoCliente from './views/PedidoCliente';
 import PedidosConfirmados from './views/PedidosConfirmados';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   const [vista, setVista] = useState('clientePedido'); // <-- Cambiado para que inicie en PedidoCliente
@@ -38,13 +40,26 @@ function App() {
     }
   };
 
-  return (
+   return (
     <div className="App">
       <Header cambiarVista={setVista} />
+
       <main style={{ minHeight: 'calc(100vh - 160px)', padding: '20px' }}>
         {renderVista()}
       </main>
+
       <Footer />
+
+      <ToastContainer 
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </div>
   );
 }
