@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import './confirmarPedidosClientes.css'; // Asegúrate que este CSS exista
 
 const ConfirmarPedidosClientes = () => {
@@ -58,35 +59,35 @@ const ConfirmarPedidosClientes = () => {
     fetchPedidosAConfirmar();
   }, []);
 
-  // Función para confirmar un pedido (cambiar estado a 'PENDIENTE' o 'en preparacion')
-  const confirmarEstePedido = async (pedidoId) => {
-    setUpdatingId(pedidoId);
-    setError(null);
-    const nuevoEstado = 'PENDIENTE'; // O 'en preparacion' según tu flujo
+ const confirmarEstePedido = async (pedidoId) => {
+  setUpdatingId(pedidoId);
+  setError(null);
+  const nuevoEstado = 'en preparacion'; // O 'en preparacion' según tu flujo
 
-    try {
-      const response = await fetch(`/api/pedidos/${pedidoId}/estado`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ estado: nuevoEstado })
-      });
+  try {
+    const response = await fetch(`/api/pedidos/${pedidoId}/estado`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ estado: nuevoEstado })
+    });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(`Error ${response.status}: ${errorData.message || `No se pudo confirmar el pedido #${pedidoId}`}`);
-      }
-      
-      // Éxito: Recargar la lista para que el pedido confirmado desaparezca
-      await fetchPedidosAConfirmar();
-      alert(`Pedido #${pedidoId} confirmado y pasado a estado ${nuevoEstado}.`);
-
-    } catch (err) {
-      console.error(`Error al confirmar el pedido ${pedidoId}:`, err);
-      setError(err.message);
-    } finally {
-      setUpdatingId(null);
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(`Error ${response.status}: ${errorData.message || `No se pudo confirmar el pedido #${pedidoId}`}`);
     }
-  };
+
+    // ✅ Éxito: mostrar notificación y recargar pedidos
+    toast.success(`Pedido #${pedidoId} confirmado y pasado a estado ${nuevoEstado}.`);
+    await fetchPedidosAConfirmar();
+
+  } catch (err) {
+    console.error(`Error al confirmar el pedido ${pedidoId}:`, err);
+    setError(err.message);
+  } finally {
+    setUpdatingId(null);
+  }
+};
+
 
   // --- Renderizado ---
   if (loading) {

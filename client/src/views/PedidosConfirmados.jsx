@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
+
 // import './pedidosConfirmados.css'; // Descomenta si tienes estilos
 
 // Estados a mostrar en esta vista (PENDIENTE, en preparacion, listo)
@@ -52,7 +54,9 @@ const PedidosConfirmados = () => {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(`Error ${response.status}: ${errorData.message || 'No se pudo actualizar el estado'}`);
       }
-
+            
+      toast.success('¡Pedido entregado!');
+      
       // Éxito: Recargar la lista para quitar el pedido entregado
       await fetchPedidos();
 
@@ -102,7 +106,7 @@ const PedidosConfirmados = () => {
               style={{ marginTop: '10px' }}
             >
               {updatingId === p.pedido_id ? 'Marcando...' : 'Marcar como Entregado'}
-            </button>
+            </button>            
           </div>
         ))
       )}

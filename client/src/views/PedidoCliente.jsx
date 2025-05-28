@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './pedidoCliente.css'; // Asegúrate que este CSS exista y esté bien
+import './pedidoCliente.css'; 
 
 const PedidoCliente = () => {
   // --- Estados ---
@@ -244,22 +244,26 @@ return (
     </div>
 
     <div className="contenido">
-      <section className="productos" aria-label="Lista de productos">
-        {productosFiltrados.length > 0 ? (
-          productosFiltrados.map(prod => (
-            <article key={prod.producto_id} className="producto-card">
-              <img src={prod.imagen_url || '/default.jpg'} alt={prod.nombre} className="producto-img" />
-              <h3>{prod.nombre}</h3>
-              <p>{prod.descripcion || 'Sin descripción'}</p>
-              <p><strong>${prod.precio ? prod.precio.toFixed(2) : 'N/D'}</strong></p>
-              <button onClick={() => agregarAlCarrito(prod)} disabled={isSubmitting}>Agregar</button>
-            </article>
-          ))
-        ) : (
-          <p>No hay productos en esta categoría o para mostrar.</p>
-        )}
-      </section>
-
+<section className="productos" aria-label="Lista de productos">
+  {productosFiltrados.length > 0 ? (
+    productosFiltrados.map(prod => (
+      <article key={prod.producto_id} className="producto-card">
+        <img
+          src={`/ImagenesProductos/${prod.producto_id}.jpg`}
+          onError={(e) => { e.currentTarget.src = '/default.jpg'; }}
+          alt={prod.nombre}
+          className="producto-img"
+        />
+        <h3>{prod.nombre}</h3>
+        <p>{prod.descripcion || 'Sin descripción'}</p>
+        <p><strong>${prod.precio ? prod.precio.toFixed(2) : 'N/D'}</strong></p>
+        <button onClick={() => agregarAlCarrito(prod)} disabled={isSubmitting}>Agregar</button>
+      </article>
+    ))
+  ) : (
+    <p>No hay productos en esta categoría o para mostrar.</p>
+  )}
+</section>
       <aside className="carrito" aria-label="Carrito de compra">
         <h2>Mi Pedido</h2>
         {carritoArray.length === 0 ? (
@@ -282,7 +286,7 @@ return (
 
         <form className="formulario-pedido" onSubmit={handleSubmitPedido}>
           <input name="nombre" placeholder="Nombre Completo*" value={formCliente.nombre} onChange={handleChangeFormCliente} required disabled={isSubmitting} />
-          <input name="telefono" type="tel" placeholder="Teléfono (Opcional)" value={formCliente.telefono} onChange={handleChangeFormCliente} disabled={isSubmitting} />
+          <input name="telefono" type="tel" placeholder="Teléfono" value={formCliente.telefono} onChange={handleChangeFormCliente} disabled={isSubmitting} />
 
           {tipoPedido === 'delivery' && (
             <input name="direccion" placeholder="Dirección Completa*" value={formCliente.direccion} onChange={handleChangeFormCliente} required disabled={isSubmitting} />
@@ -294,7 +298,7 @@ return (
             <option value="tarjeta_credito">Tarjeta de Crédito</option>
             <option value="tarjeta_debito">Tarjeta de Débito</option>
           </select>
-          <textarea name="comentario" placeholder="Comentario Adicional (Opcional)" value={formCliente.comentario} onChange={handleChangeFormCliente} disabled={isSubmitting} />
+         <textarea name="comentario" placeholder="Comentario Adicional (Opcional)" value={formCliente.comentario} onChange={handleChangeFormCliente} disabled={isSubmitting} style={{ resize: 'none' }}/>
 
           {submitError && <p className="error-text">{submitError}</p>}
 
