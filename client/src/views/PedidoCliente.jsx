@@ -17,7 +17,7 @@ const PedidoCliente = () => {
     pago: 'efectivo', // Valor por defecto
     direccion: '',
     correo: '',
-    comentario: '' // Este es 'notas' en tu tabla PEDIDOS
+    comentario: '' 
   });
 
   const [loadingCategorias, setLoadingCategorias] = useState(true);
@@ -165,7 +165,7 @@ const PedidoCliente = () => {
       notas: formCliente.comentario.trim() || null,
       items: itemsParaEnviar,
       mesa_id: null,
-      metodo_pago: formCliente.pago // <-- AÑADIDO metodo_pago
+      metodo_pago: formCliente.pago 
     };
 
     console.log("Enviando pedido de cliente:", JSON.stringify(payload, null, 2));

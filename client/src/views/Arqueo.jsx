@@ -12,9 +12,6 @@ const Arqueo = () => {
   const [montoCierreTransferencia, setMontoCierreTransferencia] = useState('');
   const [notasCierre, setNotasCierre] = useState('');
 
-  // Desglose de billetes - lo mantenemos si tu lógica original lo usaba extensivamente.
-  // Si no, se puede simplificar a un solo input para el total de efectivo real.
-  // Por ahora, lo mantendré si estaba en tu versión funcional.
   const [denominaciones, setDenominaciones] = useState({
     b2000:0, b1000:0, b500:0, b200:0, b100:0, b50:0, b20:0, b10:0,
     m10:0, m5:0, m2:0, m1:0, m050:0, m025:0, m010:0 
@@ -37,9 +34,7 @@ const Arqueo = () => {
     }
   };
 
-  // --- Mantenemos lógica original de fetchArqueoActivo, fetchHistorial, useEffect, handleAbrirCaja, handleCerrarCaja, reiniciarParaNuevaCaja ---
-  // ... (COPIA AQUÍ LAS FUNCIONES DE MANEJO DE DATOS Y ESTADOS DE TU Arqueo.jsx FUNCIONAL)
-  // Asegúrate de que las URLs de fetch sean /api/arqueos/activo y /api/arqueos
+  
   const fetchArqueoActivo = async () => {
     try {
       const response = await fetch('/api/arqueos/activo'); 
@@ -48,8 +43,8 @@ const Arqueo = () => {
         setArqueoActivo(data);
         setCajaAbierta(true);
         setMontoApertura(data.monto_inicial.toString()); 
-        if (data.fecha_hora_cierre) { // Si el arqueo activo ya está cerrado
-          setCajaAbierta(false); // Para mostrar el resumen y luego opción de abrir nueva
+        if (data.fecha_hora_cierre) { 
+          setCajaAbierta(false); 
         }
       } else {
         setArqueoActivo(null);
@@ -100,10 +95,10 @@ const Arqueo = () => {
       if (!response.ok) {
         throw new Error(data.message || 'Error al abrir la caja.');
       }
-      setArqueoActivo(data); // El backend devuelve el nuevo arqueo activo
+      setArqueoActivo(data); 
       setCajaAbierta(true);
-      setMontoApertura(''); // Limpiar después de abrir
-      // alert('Caja abierta exitosamente.'); // Puedes usar un toast o mensaje más sutil
+      setMontoApertura(''); 
+      
     } catch (err) {
       setError(err.message);
     } finally {
@@ -111,12 +106,11 @@ const Arqueo = () => {
     }
   };
   
-  // Lógica para calcular el total del desglose de billetes y monedas (si la usas)
+  // Lógica para calcular el total del desglose de billetes y monedas
    const calcularTotalBilletes = (currentDenominaciones) => {
     let total = 0;
     total += (currentDenominaciones.b2000 || 0) * 2000;
     total += (currentDenominaciones.b1000 || 0) * 1000;
-    // ... (resto de tu lógica de cálculo de billetes)
     total += (currentDenominaciones.m010 || 0) * 0.10;
     return total;
   };
@@ -128,14 +122,14 @@ const Arqueo = () => {
       [name]: parseInt(value, 10) || 0,
     };
     setDenominaciones(newDenominaciones);
-    const newTotal = calcularTotalBilletes(newDenominaciones); // Asumiendo que tienes esta función
+    const newTotal = calcularTotalBilletes(newDenominaciones); 
     setTotalContadoBilletes(newTotal);
     setMontoCierreEfectivo(newTotal.toString()); 
   };
 
 
   const handleCerrarCaja = async () => {
-    // Validación básica, puedes expandirla
+    // Validación básica
     if (isNaN(parseFloat(montoCierreEfectivo)) || isNaN(parseFloat(montoCierreTarjeta)) || isNaN(parseFloat(montoCierreTransferencia))) {
       setError('Todos los montos de cierre deben ser números válidos.');
       return;
@@ -147,9 +141,7 @@ const Arqueo = () => {
         monto_cierre_efectivo_real: parseFloat(montoCierreEfectivo) || 0,
         monto_cierre_tarjeta_real: parseFloat(montoCierreTarjeta) || 0,
         monto_cierre_transferencia_real: parseFloat(montoCierreTransferencia) || 0,
-        notas_cierre: notasCierre.trim() || null, // Asegúrate que el backend espera 'notas_cierre'
-        // Si usas el desglose de billetes, también deberías enviarlo:
-        // denominaciones: denominaciones, 
+        notas_cierre: notasCierre.trim() || null,
       };
       const response = await fetch('/api/arqueos/cerrar', { 
         method: 'PUT',
@@ -183,7 +175,7 @@ const Arqueo = () => {
   const reiniciarParaNuevaCaja = () => {
     setMontoApertura('');
     setCajaAbierta(false);
-    setArqueoActivo(null); // Crucial para limpiar el resumen y permitir nueva apertura
+    setArqueoActivo(null); 
     setMontoCierreEfectivo('');
     setMontoCierreTarjeta('');
     setMontoCierreTransferencia('');

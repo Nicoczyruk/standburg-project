@@ -117,58 +117,55 @@
   button {flex: 1 1 100%;}
 }
 
-/* client/src/views/Productos.module.css */
+
 
 .productos-page-container {
   padding: 20px;
-  font-family: Arial, sans-serif; /* O la fuente que estés usando */
+  font-family: Arial, sans-serif; 
 }
 
 .form-container {
   margin-bottom: 30px;
-  padding: 25px; /* Un poco más de padding */
-  border: 1px solid #e0e0e0; /* Borde más suave */
+  padding: 25px; 
+  border: 1px solid #e0e0e0; 
   border-radius: 8px;
-  background-color: #f9f9f9; /* Fondo ligero para el contenedor del form */
-  /* Opcional: para centrar y limitar el ancho del formulario si es necesario */
-  /* max-width: 700px; */
-  /* margin-left: auto; */
-  /* margin-right: auto; */
+  background-color: #f9f9f9; 
+  
 }
 
 .form-container h2 {
-  margin-top: 0; /* Quitar margen superior del h2 si es el primer elemento */
+  margin-top: 0; 
   margin-bottom: 25px;
-  text-align: center; /* Centrar título del formulario */
+  text-align: center; 
   color: #333;
   font-size: 1.7rem;
 }
 
-/* Contenedor para cada grupo de label + input */
+
 .formFieldGroup {
   display: flex;
-  flex-direction: column; /* Label arriba, input abajo */
-  margin-bottom: 18px; /* Espacio entre grupos de campos */
+  flex-direction: column; 
+  margin-bottom: 18px;
 }
 
 .formFieldGroup label {
-  margin-bottom: 6px; /* Espacio entre label y el input/select/textarea */
+  margin-bottom: 6px; 
   font-weight: bold;
-  color: #555; /* Color de label un poco más suave */
+  color: #555; 
   font-size: 0.9rem;
 }
 
-/* Estilos comunes para todos los campos de entrada para simetría */
+
 .formFieldGroup input[type="text"],
 .formFieldGroup input[type="number"],
 .formFieldGroup input[type="file"],
 .formFieldGroup select,
-.formFieldGroup textarea { /* Incluimos textarea aquí para estilos base */
-  width: 100%; /* Clave para la simetría: todos ocupan el ancho del .formFieldGroup */
+.formFieldGroup textarea { 
+  width: 100%; 
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
-  box-sizing: border-box; /* Importante para que width: 100% incluya padding y border */
+  box-sizing: border-box; 
   font-size: 1rem;
   transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
@@ -179,46 +176,42 @@
 .formFieldGroup input[type="file"]:focus,
 .formFieldGroup select:focus,
 .formFieldGroup textarea:focus {
-  border-color: #007bff; /* Color de borde al hacer focus */
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Sombra ligera al hacer focus */
-  outline: none; /* Quitar el outline por defecto */
+  border-color: #007bff; 
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); 
+  outline: none; 
 }
 
-/* Input de archivo puede necesitar ajustes específicos */
+
 .formFieldGroup input[type="file"] {
-  padding: 7px; /* Ajustar padding si es necesario para el input file */
-  background-color: #fff; /* Fondo blanco para el input file */
+  padding: 7px; 
+  background-color: #fff; 
 }
 
 /* Textarea con tamaño fijo y no redimensionable */
 .fixedTextarea {
-  /* width: 100%; Ya lo hereda de la regla común de arriba */
-  height: 100px;  /* Altura fija deseada */
-  resize: none;   /* Evita que el usuario pueda redimensionarlo */
+  height: 100px;  
+  resize: none;   
 }
 
 /* Botón de "Agregar Producto" */
 .submitButton {
-  width: auto; /* El ancho se ajustará al contenido y padding */
-  min-width: 180px; /* Un ancho mínimo para que no sea demasiado pequeño */
-  padding: 12px 25px; /* Padding generoso */
+  width: auto; 
+  min-width: 180px; 
+  padding: 12px 25px; 
   font-size: 1rem;
   font-weight: bold;
   color: white;
-  background-color: #28a745; /* Verde para acción principal */
+  background-color: #28a745; 
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  margin-top: 10px; /* Espacio arriba, para separarlo del último campo (imagen) */
+  margin-top: 10px; 
   transition: background-color 0.2s ease-in-out;
-  /* Si quieres que esté en una línea propia y centrado (opcional): */
-  /* display: block; */
-  /* margin-left: auto; */
-  /* margin-right: auto; */
+ 
 }
 
 .submitButton:hover {
-  background-color: #218838; /* Verde más oscuro al pasar el mouse */
+  background-color: #218838; 
 }
 
 .submitButton:disabled {
@@ -228,30 +221,30 @@
 }
 
 .error {
-  color: #dc3545; /* Rojo para errores */
+  color: #dc3545; 
   font-size: 0.9em;
   margin-top: 8px;
-  text-align: center; /* Centrar mensajes de error del formulario */
+  text-align: center; 
 }
 
-/* Estilos de la tabla (ajustados o mantenidos de tu versión anterior) */
+/* Estilos de la tabla */
 .tabla-container {
-  margin-top: 40px; /* Más espacio sobre la tabla */
-  overflow-x: auto; /* Para responsividad si la tabla es muy ancha */
+  margin-top: 40px; 
+  overflow-x: auto; 
 }
 
 .tabla-productos {
   width: 100%;
   border-collapse: collapse;
-  background-color: #fff; /* Fondo blanco para la tabla */
+  background-color: #fff; 
 }
 
 .tabla-productos th,
 .tabla-productos td {
-  border: 1px solid #dee2e6; /* Borde más estándar para tablas */
-  padding: 12px; /* Más padding en celdas */
+  border: 1px solid #dee2e6; 
+  padding: 12px; 
   text-align: left;
-  vertical-align: middle; /* Alinear contenido verticalmente */
+  vertical-align: middle; 
 }
 
 .tabla-productos th {
@@ -269,15 +262,15 @@
 }
 
 .producto-imagen-tabla {
-  max-width: 70px; /* Ajustar tamaño de imagen en tabla */
+  max-width: 70px; 
   height: auto;
   border-radius: 4px;
-  border: 1px solid #eee; /* Borde sutil para imágenes */
+  border: 1px solid #eee; 
 }
 
 .productos-page-container h1 {
-  color: #ff0000; /* O el color que prefieras para el título principal */
-  font-size: 2.2rem; /* Un tamaño prominentemente más grande */
+  color: #ff0000; 
+  font-size: 2.2rem; 
   text-align: center;
-  margin-bottom: 35px; /* Espacio debajo del título principal */
+  margin-bottom: 35px; 
 }

@@ -1,5 +1,5 @@
 /* Contenedor principal */
-.pedido-container {
+.pedido-cliente-container {
   padding: 1rem;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #f8f8f8;
@@ -7,6 +7,8 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  width: 100%; 
+  box-sizing: border-box; 
 } 
 
 /* Encabezado */
@@ -141,6 +143,8 @@
   padding-bottom: 0.5rem;
   scrollbar-width: thin;
   scrollbar-color: #b91c1c transparent;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 .categorias::-webkit-scrollbar {
@@ -499,3 +503,82 @@
   flex-direction: column !important;
 }
 
+
+.categorias-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 15px 10px;
+  margin-bottom: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.categoria-boton {
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  background-color: #f8f9fa;
+  color: #333;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  flex-grow: 1;
+  flex-basis: 100px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.categoria-boton:hover {
+  background-color: #e9ecef;
+  border-color: #c0c0c0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.categoria-boton.seleccionada {
+  background-color: #b91c1c; 
+  color: white;
+  border-color: #a81a1a;
+  font-weight: bold;
+  box-shadow: 0 2px 5px rgba(185, 28, 28, 0.3);
+}
+
+/* BOTONES DE CATEGORIAS */
+.categoria-btn { 
+  padding: 10px 15px; 
+  border: 1px solid #b91c1c;
+  background-color: #b91c1c;
+  color: #f8f9fa;
+  border-radius: 20px; 
+  font-size: 0.9rem;
+  font-weight: 600; 
+  cursor: pointer;
+  white-space: nowrap; 
+  text-align: center; 
+
+  flex-grow: 1; 
+  flex-basis: 100px; 
+  
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  user-select: none; 
+}
+
+.categoria-btn.activa { 
+  background-color: #b91c1c; 
+  color: white;
+  border-color: #a81a1a; 
+  font-weight: bold; 
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
+}
+
+.categoria-btn:hover:not(.activa) { 
+    background-color: #ffe5e5;
+    border-color: #991b1b;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}

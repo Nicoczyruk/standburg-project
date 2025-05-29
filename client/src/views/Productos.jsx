@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-// import './Productos.css'; // Se comenta o elimina la importación antigua
-import styles from './Productos.module.css'; // NUEVA IMPORTACIÓN del CSS Module
+import styles from './Productos.module.css'; 
 
 const Productos = () => {
   // --- Estados ---

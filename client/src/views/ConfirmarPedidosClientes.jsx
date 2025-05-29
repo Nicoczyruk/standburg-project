@@ -95,7 +95,7 @@ const ConfirmarPedidosClientes = () => {
 
       <div className={styles['lista-pedidos-confirmar']}>
         {pedidosPorConfirmar.map(pedido => (
-          // El objeto 'pedido' aquí ya debería tener la propiedad 'detalles' poblada
+          
           <div key={pedido.pedido_id} className={styles['pedido-card-confirmar']}>
             <h2>Pedido ID: {pedido.pedido_id}</h2>
             <div className={styles['info-pedido']}>

@@ -71,7 +71,7 @@ const Gastos = () => {
   };
 
   const eliminarGasto = async (id) => {
-    // Confirmación antes de eliminar (opcional pero recomendado)
+    // Confirmación antes de eliminar
     // if (!window.confirm("¿Estás seguro de que quieres eliminar este gasto?")) {
     //   return;
     // }
@@ -120,8 +120,8 @@ const Gastos = () => {
       setEditandoId(null);
       fetchGastos();
     } catch (err) {
-      // Mostrar error de edición específico si se desea
-      setSubmitError(`Error al guardar: ${err.message}`); // Reutilizar submitError o crear uno nuevo
+      // Mostrar error de edición específico
+      setSubmitError(`Error al guardar: ${err.message}`); 
     } finally {
       setIsSubmitting(false);
     }
@@ -197,7 +197,7 @@ const Gastos = () => {
                   </div>
                 </div>
               ) : (
-                <> {/* Estructura mejorada para mostrar información del gasto */}
+                <> {/* Estructura  para mostrar información del gasto */}
                   <div className={styles.gastoInfo}>
                     <span className={styles.gastoConcepto}>{g.concepto}</span>
                     <span className={styles.gastoMonto}>${parseFloat(g.monto).toFixed(2)}</span>

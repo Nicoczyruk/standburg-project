@@ -1,12 +1,12 @@
 // client/src/views/PedidosConfirmados.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
-import styles from './PedidosConfirmados.module.css'; // Correcta importación de CSS Module
+import styles from './PedidosConfirmados.module.css';
 
 const ESTADO_EN_PREPARACION = 'en preparacion';
 const ESTADO_ENTREGADO = 'entregado';
 
-// ESTADOS_COLORES_CLASES ahora directamente usa los nombres de tu CSS para los badges de estado
+
 const ESTADOS_COLORES_CLASES = {
   'pendiente': styles['estado-PENDIENTE'],
   'en preparacion': styles['estado-en-preparacion'],
@@ -110,11 +110,11 @@ const PedidosConfirmados = () => {
       {/* Título - El CSS lo estiliza por etiqueta h1 dentro del contenedor */}
       <h1>Gestión de Pedidos</h1>
       
-      {/* Contenedor de filtros - Clase corregida */}
+      {/* Contenedor de filtros*/}
       <div className={styles['filtros-pedidos']}>
         <button 
             onClick={() => handleFiltroChange(ESTADO_EN_PREPARACION)} 
-            // Clases corregidas para botón de filtro y estado activo
+            
             className={`${styles['boton-filtro']} ${filtroActual === ESTADO_EN_PREPARACION ? styles.activo : ''}`}
         >
             En Preparación
@@ -127,20 +127,18 @@ const PedidosConfirmados = () => {
         </button>
       </div>
 
-      {/* Lista de pedidos (grid) - Clase corregida */}
+      {/* Lista de pedidos (grid)*/}
       <div className={styles['lista-pedidos']}>
         {pedidos.length === 0 && !loading && (
-          // Mensaje "no hay pedidos" - Clase corregida
+          // Mensaje "no hay pedidos" 
           <p className={styles['no-pedidos-mensaje']}>No hay pedidos en estado "{filtroActual}".</p>
         )}
         {pedidos.map(pedido => (
-          // Tarjeta de pedido - Clase base correcta
+          // Tarjeta de pedido 
           <div 
             key={pedido.pedido_id} 
-            className={styles['pedido-card']} // Ya no se aplica el color de estado aquí
+            className={styles['pedido-card']} 
           >
-            {/* Título de la tarjeta (h2 o h3) - Usamos h2 como en el CSS, o ajusta el CSS a h3 si prefieres */}
-            {/* El CSS tiene estilos para '.pedido-card h2' */}
             <h2>Pedido #{pedido.pedido_id} - Mesa: {pedido.numero_mesa || pedido.id_mesa || 'N/A'}</h2>
             
             {/* Contenedor para información del pedido para aplicar estilos flex */}
@@ -156,13 +154,12 @@ const PedidosConfirmados = () => {
               </p>
             </div>
             
-            {/* Título de productos - Clase correcta */}
+            {/* Título de productos*/}
             <h4 className={styles['titulo-productos']}>Productos:</h4>
-            {/* Lista de productos UL - Clase correcta */}
+            {/* Lista de productos UL */}
             <ul className={styles['lista-productos-pedido']}>
               {pedido.productos && pedido.productos.length > 0 ? (
                 pedido.productos.map((producto, index) => (
-                  // El CSS estiliza 'li' directamente dentro de '.lista-productos-pedido li'
                   <li key={`${pedido.pedido_id}-${producto.producto_id}-${index}`}>
                     {producto.nombre_producto || 'Producto desconocido'} - Cant: {producto.cantidad} - Precio: ${producto.precio_unitario?.toFixed(2)}
                   </li>
@@ -171,15 +168,15 @@ const PedidosConfirmados = () => {
                 <li>No hay detalles de productos para este pedido.</li>
               )}
             </ul>
-            {/* Total del Pedido - Estilizado por 'p' general dentro de 'pedido-card' o 'info-pedido' */}
+            {/* Total del Pedido */}
             <p><strong>Total del Pedido:</strong> ${pedido.total_pedido?.toFixed(2)}</p>
 
-            {/* Acciones del pedido - Clase correcta */}
+            {/* Acciones del pedido */}
             <div className={styles['acciones-pedido']}>
               {pedido.estado && pedido.estado.toLowerCase() === ESTADO_EN_PREPARACION && (
                 <button
                   onClick={() => cambiarEstadoPedido(pedido.pedido_id, ESTADO_ENTREGADO)}
-                  // Clases correctas para botón de acción y tipo de botón
+                  // Clases para botón de acción y tipo de botón
                   className={`${styles['boton-accion-card']} ${styles['boton-entregado']}`}
                   disabled={updatingId === pedido.pedido_id}
                 >

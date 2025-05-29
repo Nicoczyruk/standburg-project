@@ -5,17 +5,17 @@
   max-width: 700px;
   margin: 30px auto;
   padding: 25px;
-  background: #fefefe; /* COLOR ORIGINAL: Fondo principal */
+  background: #fefefe; 
   border-radius: 10px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-  font-family: Arial, sans-serif; /* TIPOGRAFÍA ORIGINAL */
-  color: #333; /* Color de texto base por defecto (oscuro para legibilidad) */
+  font-family: Arial, sans-serif; 
+  color: #333; 
 }
 
 /* Títulos */
 .arqueo-container h1 {
   text-align: center;
-  color: #c0392b; /* ROJO para el título principal */
+  color: #c0392b; 
   font-size: 2rem;
   margin-bottom: 30px;
   font-weight: 600;
@@ -23,7 +23,7 @@
 
 .arqueo-container h2 {
   font-size: 1.5rem;
-  color: #c0392b; /* ROJO para subtítulos de sección */
+  color: #c0392b; 
   margin-top: 30px;
   margin-bottom: 20px;
   padding-bottom: 10px;
@@ -33,25 +33,24 @@
 
 .arqueo-container h3 {
   font-size: 1.2rem;
-  color: #d35400; /* ROJO anaranjado o tu rojo principal */
+  color: #d35400; 
   margin-top: 20px;
   margin-bottom: 15px;
 }
 
 /* Secciones generales */
-/* Estas clases corresponden a .apertura, .cierre-caja-form, .resultado-final de tu JSX original */
-.seccion-formulario, /* Para Abrir y Cerrar Caja */
-.seccion-resultado { /* Para el Resumen del Arqueo Cerrado */
-  background: #eef; /* COLOR ORIGINAL para estas secciones (resumen-operaciones, resultado-final) */
+.seccion-formulario, 
+.seccion-resultado { 
+  background: #eef; 
   padding: 25px;
   border-radius: 8px;
   margin-bottom: 30px;
   border: 1px solid #dcdcdc;
 }
 
-.seccion-historial-contenedor { /* Contenedor para la lista de historial */
-  background: transparent; /* Sin fondo propio, usará el del .arqueo-container */
-  padding: 0; /* Sin padding extra si las tarjetas internas ya lo tienen */
+.seccion-historial-contenedor { 
+  background: transparent; 
+  padding: 0; 
   border-radius: 8px;
   margin-bottom: 30px;
 }
@@ -59,14 +58,14 @@
 
 /* Grupos de input */
 .input-group {
-  margin-bottom: 15px; /* Original de .apertura input */
+  margin-bottom: 15px; 
 }
 
 .input-group label {
   display: block;
   margin-bottom: 8px;
   font-weight: bold;
-  color: #c0392b; /* ROJO para labels */
+  color: #c0392b; 
   font-size: 0.9rem;
 }
 
@@ -81,13 +80,13 @@
   font-size: 1rem;
   line-height: 1.5;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  background-color: #fff; /* Fondo blanco para inputs para asegurar legibilidad */
-  color: #333; /* Texto oscuro en inputs */
+  background-color: #fff; 
+  color: #333; 
 }
 
 .input-group input[type="number"]:focus,
 .input-group textarea:focus {
-  border-color: #2c7; /* Verde original del botón para el focus */
+  border-color: #2c7; 
   box-shadow: 0 0 0 3px rgba(44, 119, 119, 0.15);
   outline: none;
 }
@@ -98,17 +97,17 @@
 }
 
 /* Botones */
-.boton-accion { /* Clase base para botones, como el de Abrir Caja */
+.boton-accion { 
   display: inline-block;
   width: 100%;
-  padding: 10px; /* Original */
-  background-color: #2c7; /* COLOR ORIGINAL del botón de apertura */
-  border: none; /* Original */
-  color: white; /* Original */
-  font-weight: bold; /* Original */
+  padding: 10px; 
+  background-color: #2c7; 
+  border: none; 
+  color: white; 
+  font-weight: bold; 
   font-size: 1rem;
   cursor: pointer;
-  border-radius: 5px; /* Original */
+  border-radius: 5px; 
   text-align: center;
   transition: background-color 0.2s ease, transform 0.1s ease;
   margin-top: 10px;
@@ -123,23 +122,22 @@
   transform: none;
 }
 
-/* Botones específicos con otros colores si es necesario */
-.boton-cierre { /* Para el botón "Cerrar Caja" */
-  
-  background-color: #c0392b; /* Ejemplo: ROJO para este botón */
-}
-/* .boton-cierre:hover { background-color: #a93226; } */
 
-.boton-reiniciar { /* Para "Abrir Nueva Caja" después de un cierre */
-  /* background-color: #e67e22; */ /* Ejemplo: Naranja, o tu verde #2c7 */
+.boton-cierre { 
+  
+  background-color: #c0392b; 
+}
+
+
+.boton-reiniciar { 
   margin-top: 20px;
 }
-/* .boton-reiniciar:hover { background-color: #d35400; } */
 
 
-/* Resultado del Arqueo (sección que muestra el arqueo cerrado) */
+
+
 .resultado-arqueo-detalles {
-  /* background: #eef; Ya cubierto por .seccion-resultado */
+  
   padding-top: 15px;
 }
 .resultado-arqueo-detalles p {
@@ -150,35 +148,35 @@
   justify-content: space-between;
   border-bottom: 1px dashed #dcdcdc;
   padding-bottom: 8px;
-  color: #333; /* Texto oscuro para los detalles del resultado, el ROJO irá en los labels */
+  color: #333; 
 }
 .resultado-arqueo-detalles p:last-of-type {
   border-bottom: none;
 }
-.resultado-arqueo-detalles strong { /* Labels como "Monto Inicial:" */
-  color: #c0392b; /* ROJO para los labels */
+.resultado-arqueo-detalles strong { 
+  color: #c0392b;
   margin-right: 10px;
 }
-.valor-numerico { /* Para los valores */
+.valor-numerico { 
   font-weight: 500;
-  color: #333; /* Texto oscuro para los valores */
+  color: #333; 
 }
 
-.valor-positivo { /* Solo para el texto del valor de la diferencia */
+.valor-positivo { 
   color: green; 
   font-weight: bold;
 }
-.valor-negativo { /* Solo para el texto del valor de la diferencia */
-  color: #c0392b; /* ROJO para diferencias negativas */
+.valor-negativo { 
+  color: #c0392b; 
   font-weight: bold;
 }
 
-/* Desglose de billetes (clases originales de tu JSX) */
+
 .billetes-container { 
   margin: 20px 0;
   padding: 15px;
-  background-color: transparent; /* Sin fondo propio, usa el de .seccion-formulario */
-  border: 1px solid #e0e0e0; /* Un borde para separar visualmente */
+  background-color: transparent; 
+  border: 1px solid #e0e0e0; 
   border-radius: 6px;
 }
 .billetes-grid {
@@ -191,14 +189,14 @@
   display: flex;
   flex-direction: column;
   padding: 10px;
-  background-color: #fff; /* Fondo blanco para contraste */
+  background-color: #fff; 
   border: 1px solid #d8d8d8;
   border-radius: 6px;
 }
 .billete-item label {
     font-size: 0.85rem;
     margin-bottom: 6px;
-    color: #c0392b; /* ROJO para labels de billetes */
+    color: #c0392b; 
 }
 .billete-item input {
     width: 100%;
@@ -207,7 +205,7 @@
     border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 0.9rem;
-    color: #333; /* Texto oscuro */
+    color: #333; 
 }
 .total-contado-billetes {
     text-align: right;
@@ -216,18 +214,18 @@
     margin-top: 15px;
     padding-top: 10px;
     border-top: 1px solid #ccc;
-    color: #c0392b; /* ROJO para el total */
+    color: #c0392b; 
 }
 
 /* Historial de Arqueos */
 .registro-arqueo-card { 
-  background-color: #ffffff; /* Fondo blanco para cada tarjeta */
+  background-color: #ffffff; 
   border: 1px solid #d8d8d8;
   padding: 20px;
   margin-bottom: 20px;
   border-radius: 8px;
   box-shadow: 0 3px 10px rgba(0,0,0,0.05);
-  color: #333; /* Texto oscuro por defecto dentro de la tarjeta */
+  color: #333; 
 }
 .registro-header {
   display: flex;
@@ -241,11 +239,11 @@
 .registro-id {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #c0392b; /* ROJO para el ID */
+  color: #c0392b; 
 }
 .registro-fechas {
   font-size: 0.85rem;
-  color: #555; /* Gris oscuro para fechas */
+  color: #555; 
   text-align: right;
 }
 .registro-fechas span {
@@ -267,35 +265,35 @@
   border-bottom: none;
 }
 .registro-label {
-  color: #c0392b; /* ROJO para labels en el historial */
+  color: #c0392b; 
   margin-right: 10px;
 }
 .registro-valor {
   font-weight: 500;
-  color: #333; /* Texto oscuro para valores */
+  color: #333; 
   text-align: right;
 }
 .registro-notas {
   margin-top: 12px;
   font-size: 0.85rem;
-  background-color: #f9f9f9; /* Fondo muy ligero para notas */
+  background-color: #f9f9f9; 
   padding: 10px;
   border-radius: 4px;
   border-left: 3px solid #ccc; 
-  color: #333; /* Texto oscuro para notas */
+  color: #333; 
 }
-.registro-notas .registro-label { /* Si tienes "Notas:" como label dentro */
+.registro-notas .registro-label { 
   font-weight: bold;
   display: block;
   margin-bottom: 4px;
-  color: #c0392b; /* ROJO */
+  color: #c0392b; 
 }
 
 
 /* Mensajes */
 .error-message { 
   color: white; 
-  background-color: #c0392b; /* ROJO de fondo para error */
+  background-color: #c0392b; 
   border: 1px solid #a93226;
   padding: 12px;
   margin: 20px 0;
@@ -307,6 +305,6 @@
   text-align: center;
   padding: 25px;
   font-style: italic;
-  color: #555; /* Texto gris para cargando */
+  color: #555; 
   font-size: 1.1rem;
 }

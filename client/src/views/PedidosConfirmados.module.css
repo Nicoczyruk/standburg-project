@@ -1,7 +1,7 @@
 /* client/src/views/PedidosConfirmados.module.css */
 .pedidos-confirmados-container {
   padding: 2rem;
-  font-family: 'Roboto', sans-serif; /* O Arial si es el general de tu app */
+  font-family: 'Roboto', sans-serif; 
   background-color: white;
   color: black;
   min-height: 100vh;
@@ -9,7 +9,7 @@
 
 .pedidos-confirmados-container h1 {
   text-align: center;
-  color: #c40000; /* Color de tu tema */
+  color: #c40000; 
   margin-bottom: 2.5rem;
   font-size: 2.2rem;
   font-weight: 700;
@@ -24,11 +24,11 @@
 }
 
 .boton-filtro {
-  padding: 0.7rem 1.5rem; /* Un poco más de padding */
-  border: 1px solid #c40000; /* Borde con color primario */
+  padding: 0.7rem 1.5rem; 
+  border: 1px solid #c40000; 
   background-color: white;
   color: #c40000;
-  border-radius: 25px; /* Más redondeado para efecto "pill" */
+  border-radius: 25px; 
   cursor: pointer;
   font-weight: 500;
   font-size: 0.9rem;
@@ -36,26 +36,26 @@
 }
 
 .boton-filtro.activo {
-  background-color: #c40000; /* Color primario */
+  background-color: #c40000; 
   color: white;
-  box-shadow: 0 2px 8px rgba(196, 0, 0, 0.3); /* Sombra sutil del color */
-  border-color: #a30000; /* Borde un poco más oscuro para el activo */
+  box-shadow: 0 2px 8px rgba(196, 0, 0, 0.3); 
+  border-color: #a30000; 
 }
 
 .boton-filtro:not(.activo):hover {
-  background-color: #fde0e0; /* Rojo muy pálido */
+  background-color: #fde0e0; 
   border-color: #a30000;
 }
 
 .lista-pedidos {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); /* Ancho de tarjeta ajustado */
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 2rem;
 }
 
 .pedido-card {
-  background-color: #f9f9f9; /* Tu original era #f8f8f8, este es similar */
-  border: 1px solid #e0e0e0; /* Tu original era #ddd */
+  background-color: #f9f9f9; 
+  border: 1px solid #e0e0e0; 
   border-radius: 10px;
   padding: 1.5rem;
   box-shadow: 0 4px 12px rgba(0,0,0,0.07);
@@ -66,7 +66,7 @@
 
 .pedido-card h2 {
   font-size: 1.3rem;
-  color: #c40000; /* Color primario */
+  color: #c40000; 
   margin-top: 0;
   margin-bottom: 0.8rem;
   border-bottom: 1px solid #eee;
@@ -88,7 +88,7 @@
   align-items: baseline;
 }
 .info-pedido p strong {
-  color: #555; /* O tu rojo si prefieres: #c0392b */
+  color: #555; 
   font-weight: 600;
   flex-basis: 100px;
   min-width: 100px;
@@ -97,7 +97,7 @@
 
 .titulo-productos {
   font-size: 1.1rem;
-  color: #333; /* O tu rojo: #c0392b */
+  color: #333; 
   margin-top: 0.8rem;
   margin-bottom: 0.5rem;
   font-weight: 600;
@@ -107,15 +107,15 @@
   list-style: none;
   padding: 0.5rem;
   margin: 0 0 0.8rem 0;
-  max-height: 180px; /* Un poco más de altura para detalles */
+  max-height: 180px; 
   overflow-y: auto;
   border: 1px solid #f0f0f0;
-  border-radius: 6px; /* Bordes redondeados */
-  background-color: #fff; /* Fondo blanco para la lista */
+  border-radius: 6px; 
+  background-color: #fff; 
 }
 
 .lista-productos-pedido li {
-  padding: 0.4rem 0.2rem; /* Padding ajustado */
+  padding: 0.4rem 0.2rem; 
   font-size: 0.9rem;
   border-bottom: 1px dotted #eee;
 }
@@ -132,18 +132,17 @@
 
 .estado-pedido {
   font-weight: bold;
-  padding: 0.4rem 0.9rem; /* Padding ajustado */
-  border-radius: 16px; /* Efecto "pill" */
+  padding: 0.4rem 0.9rem; 
+  border-radius: 16px; 
   display: inline-block;
-  margin-top: 0.3rem; /* Ajuste de margen */
-  font-size: 0.8em; /* Un poco más pequeño */
+  margin-top: 0.3rem; 
+  font-size: 0.8em; 
   text-align: center;
-  min-width: 110px; /* Ancho mínimo */
-  border: 1px solid transparent; /* Para posible borde en hover si se desea */
+  min-width: 110px; 
+  border: 1px solid transparent; 
 }
 
-/* Colores de estado (de tu CSS original o adaptados) */
-/* Asegúrate que estos nombres de clase coincidan con ESTADOS_COLORES_CLASES */
+
 .estado-PENDIENTE { background-color: #ffc107; color: #333; border-color: #e0a800; }
 .estado-en-preparacion { background-color: #17a2b8; color: white; border-color: #138496;}
 .estado-listo { background-color: #28a745; color: white; border-color: #1e7e34;}
@@ -183,15 +182,14 @@
   transform: none;
 }
 
-/* Colores específicos para botones de acción (adaptados de tu CSS original si es posible) */
-/* Asumiendo colores de tu tema si no estaban especificados */
-.boton-entregado { background-color: #007bff; } /* Azul como en tu CSS de Arqueo o Gastos */
+
+.boton-entregado { background-color: #007bff; } 
 .boton-entregado:hover { background-color: #0056b3; }
 
-.boton-cancelar { background-color: #dc3545; } /* Rojo de tu CSS */
+.boton-cancelar { background-color: #dc3545; } 
 .boton-cancelar:hover { background-color: #c82333; }
 
-.boton-reabrir { background-color: #ffc107; color: #333;} /* Amarillo de tu CSS */
+.boton-reabrir { background-color: #ffc107; color: #333;} 
 .boton-reabrir:hover { background-color: #e0a800; }
 
 

@@ -170,8 +170,8 @@ const MovimientoCaja = () => {
           onChange={handleInputChange}
           disabled={isSubmitting}
         />
-        {/* Opcional: Input para metodo_pago_afectado si es necesario */}
-        {/* <input type="text" name="metodo_pago_afectado" placeholder="Método afectado (ej: efectivo)" value={nuevoMovimiento.metodo_pago_afectado} onChange={handleInputChange} /> */}
+        
+        {}
         <button onClick={agregarMovimiento} disabled={isSubmitting}>
           {isSubmitting ? 'Agregando...' : 'Agregar Movimiento'}
         </button>
@@ -196,7 +196,7 @@ const MovimientoCaja = () => {
             <th>Descripción</th>
             <th>Monto</th>
             <th>Fecha</th>
-            {/* <th>Método Afectado</th> */}
+            {}
           </tr>
         </thead>
         <tbody>
@@ -207,7 +207,7 @@ const MovimientoCaja = () => {
                 <td>{m.descripcion}</td>
                 <td>${(parseFloat(m.monto) || 0).toFixed(2)}</td>
                 <td>{formatDisplayDate(m.fecha_hora_movimiento)}</td>
-                {/* <td>{m.metodo_pago_afectado || '-'}</td> */}
+                {}
               </tr>
             ))
           ) : (
