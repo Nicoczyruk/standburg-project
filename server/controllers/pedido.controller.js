@@ -166,9 +166,30 @@ const actualizarEstadoPedido = async (req, res, next) => {
     }
 };
 
+const obtenerPedidosParaGestion = async (req, res, next) => {
+    const { estado } = req.query;
+
+    if (!estado) {
+        return res.status(400).json({ message: 'El parámetro de consulta "estado" es requerido para esta vista.' });
+    }
+    if (!ESTADOS_PEDIDO_VALIDOS.includes(estado)) {
+        return res.status(400).json({ message: `Estado de filtro inválido: ${estado}. Valores permitidos: ${ESTADOS_PEDIDO_VALIDOS.join(', ')}` });
+    }
+
+    try {
+        // Llama a la nueva función de consulta
+        const pedidosConDetalles = await pedidoQueries.getPedidosParaGestionConDetalles(estado);
+        res.json(pedidosConDetalles || []);
+    } catch (error) {
+        console.error(`Error en obtenerPedidosParaGestion con estado ${estado}:`, error);
+        next(error);
+    }
+};
+
 module.exports = {
     obtenerTodosLosPedidos,
     obtenerPedidoPorId,
     crearPedido, 
     actualizarEstadoPedido,
+    obtenerPedidosParaGestion,
 };

@@ -1,0 +1,283 @@
+.productos-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.titulo {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #333;
+}
+
+.card-form {
+  background: #fff;
+  padding: 20px 30px;
+  box-shadow: 0 2px 10px rgb(0 0 0 / 0.1);
+  border-radius: 8px;
+  margin-bottom: 40px;
+}
+
+.card-form h2 {
+  margin-bottom: 20px;
+  color: #ff0400;
+}
+
+.form-producto {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.form-producto input[type="text"],
+.form-producto input[type="number"],
+.form-producto select,
+.form-producto input[type="file"] {
+  flex: 1 1 180px;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.form-producto button {
+  flex: 1 1 100%;
+  padding: 12px;
+  background-color: #ff0000;
+  color: white;
+  font-weight: 600;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 10px;
+}
+
+.form-producto button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.form-producto button:hover:not(:disabled) {
+  background-color: #ff0000;
+}
+
+.error {
+  color: #d93025;
+  margin-top: 8px;
+  font-weight: 600;
+}
+
+/* Tabla productos */
+.tabla-container {
+  overflow-x: auto;
+}
+
+.tabla-productos {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.tabla-productos thead {
+  background-color: #ff0000;
+  color: white;
+}
+
+.tabla-productos th,
+.tabla-productos td {
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.tabla-productos tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.img-producto {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+/* Responsividad */
+@media (max-width: 600px) {
+  .form-producto {
+    flex-direction: column;
+  }
+
+  .form-producto input,
+  .form-producto select,
+  .form-producto
+  button {flex: 1 1 100%;}
+}
+
+/* client/src/views/Productos.module.css */
+
+.productos-page-container {
+  padding: 20px;
+  font-family: Arial, sans-serif; /* O la fuente que estés usando */
+}
+
+.form-container {
+  margin-bottom: 30px;
+  padding: 25px; /* Un poco más de padding */
+  border: 1px solid #e0e0e0; /* Borde más suave */
+  border-radius: 8px;
+  background-color: #f9f9f9; /* Fondo ligero para el contenedor del form */
+  /* Opcional: para centrar y limitar el ancho del formulario si es necesario */
+  /* max-width: 700px; */
+  /* margin-left: auto; */
+  /* margin-right: auto; */
+}
+
+.form-container h2 {
+  margin-top: 0; /* Quitar margen superior del h2 si es el primer elemento */
+  margin-bottom: 25px;
+  text-align: center; /* Centrar título del formulario */
+  color: #333;
+  font-size: 1.7rem;
+}
+
+/* Contenedor para cada grupo de label + input */
+.formFieldGroup {
+  display: flex;
+  flex-direction: column; /* Label arriba, input abajo */
+  margin-bottom: 18px; /* Espacio entre grupos de campos */
+}
+
+.formFieldGroup label {
+  margin-bottom: 6px; /* Espacio entre label y el input/select/textarea */
+  font-weight: bold;
+  color: #555; /* Color de label un poco más suave */
+  font-size: 0.9rem;
+}
+
+/* Estilos comunes para todos los campos de entrada para simetría */
+.formFieldGroup input[type="text"],
+.formFieldGroup input[type="number"],
+.formFieldGroup input[type="file"],
+.formFieldGroup select,
+.formFieldGroup textarea { /* Incluimos textarea aquí para estilos base */
+  width: 100%; /* Clave para la simetría: todos ocupan el ancho del .formFieldGroup */
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box; /* Importante para que width: 100% incluya padding y border */
+  font-size: 1rem;
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+/* Efecto focus para los inputs */
+.formFieldGroup input[type="text"]:focus,
+.formFieldGroup input[type="number"]:focus,
+.formFieldGroup input[type="file"]:focus,
+.formFieldGroup select:focus,
+.formFieldGroup textarea:focus {
+  border-color: #007bff; /* Color de borde al hacer focus */
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Sombra ligera al hacer focus */
+  outline: none; /* Quitar el outline por defecto */
+}
+
+/* Input de archivo puede necesitar ajustes específicos */
+.formFieldGroup input[type="file"] {
+  padding: 7px; /* Ajustar padding si es necesario para el input file */
+  background-color: #fff; /* Fondo blanco para el input file */
+}
+
+/* Textarea con tamaño fijo y no redimensionable */
+.fixedTextarea {
+  /* width: 100%; Ya lo hereda de la regla común de arriba */
+  height: 100px;  /* Altura fija deseada */
+  resize: none;   /* Evita que el usuario pueda redimensionarlo */
+}
+
+/* Botón de "Agregar Producto" */
+.submitButton {
+  width: auto; /* El ancho se ajustará al contenido y padding */
+  min-width: 180px; /* Un ancho mínimo para que no sea demasiado pequeño */
+  padding: 12px 25px; /* Padding generoso */
+  font-size: 1rem;
+  font-weight: bold;
+  color: white;
+  background-color: #28a745; /* Verde para acción principal */
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px; /* Espacio arriba, para separarlo del último campo (imagen) */
+  transition: background-color 0.2s ease-in-out;
+  /* Si quieres que esté en una línea propia y centrado (opcional): */
+  /* display: block; */
+  /* margin-left: auto; */
+  /* margin-right: auto; */
+}
+
+.submitButton:hover {
+  background-color: #218838; /* Verde más oscuro al pasar el mouse */
+}
+
+.submitButton:disabled {
+  background-color: #cccccc;
+  color: #666666;
+  cursor: not-allowed;
+}
+
+.error {
+  color: #dc3545; /* Rojo para errores */
+  font-size: 0.9em;
+  margin-top: 8px;
+  text-align: center; /* Centrar mensajes de error del formulario */
+}
+
+/* Estilos de la tabla (ajustados o mantenidos de tu versión anterior) */
+.tabla-container {
+  margin-top: 40px; /* Más espacio sobre la tabla */
+  overflow-x: auto; /* Para responsividad si la tabla es muy ancha */
+}
+
+.tabla-productos {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff; /* Fondo blanco para la tabla */
+}
+
+.tabla-productos th,
+.tabla-productos td {
+  border: 1px solid #dee2e6; /* Borde más estándar para tablas */
+  padding: 12px; /* Más padding en celdas */
+  text-align: left;
+  vertical-align: middle; /* Alinear contenido verticalmente */
+}
+
+.tabla-productos th {
+ 
+
+  background-color: #ff0000; 
+  color: white;              
+
+  font-weight: bold; 
+  padding: 12px;     
+  text-align: left;  
+  vertical-align: middle; 
+  border: 1px solid #bf2f2a; 
+                             
+}
+
+.producto-imagen-tabla {
+  max-width: 70px; /* Ajustar tamaño de imagen en tabla */
+  height: auto;
+  border-radius: 4px;
+  border: 1px solid #eee; /* Borde sutil para imágenes */
+}
+
+.productos-page-container h1 {
+  color: #ff0000; /* O el color que prefieras para el título principal */
+  font-size: 2.2rem; /* Un tamaño prominentemente más grande */
+  text-align: center;
+  margin-bottom: 35px; /* Espacio debajo del título principal */
+}

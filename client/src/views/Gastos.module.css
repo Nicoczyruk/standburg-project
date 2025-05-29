@@ -1,0 +1,320 @@
+/* client/src/views/Gastos.module.css */
+.gastos-container {
+  max-width: 800px;
+  margin: 20px auto; /* Agregado margen superior e inferior */
+  padding: 25px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+}
+
+.gastos-container h1 {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 2rem;
+  color: #333;
+  font-weight: 600;
+}
+
+/* Base para inputs, selects principales para consistencia */
+.form-gasto input,
+.form-gasto select,
+.filtros select,
+.filtros input[type="date"] {
+  box-sizing: border-box;
+  padding: 0 12px; /* Ajustado para controlar mejor la altura con line-height */
+  font-size: 1rem;
+  line-height: 46px; /* Para igualar altura con el borde de 1px * 2 */
+  height: 48px; /* Altura fija */
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  width: 100%;
+}
+
+.form-gasto select {
+  padding-left: 10px; /* Ajuste para el select si es necesario */
+}
+
+/* Efecto focus general */
+.form-gasto input:focus,
+.form-gasto select:focus,
+.filtros select:focus,
+.filtros input[type="date"]:focus {
+  border-color: #ff3b3b;
+  box-shadow: 0 0 0 3px rgba(255, 59, 59, 0.15);
+  outline: none;
+}
+
+/* Formulario de nuevo gasto */
+.form-gasto {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 15px;
+  margin-bottom: 30px;
+  align-items: baseline; /* Intenta alinear por la línea base del texto interno */
+}
+
+.formSubmitButton {
+  grid-column: 1 / -1;
+  padding: 0 12px; /* Consistente con otros campos */
+  font-size: 1rem;
+  line-height: 46px;
+  height: 48px;
+  border-radius: 8px;
+  background-color: #ff3b3b;
+  color: white;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+.formSubmitButton:hover {
+  background-color: #e03434;
+}
+
+.formSubmitButton:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Divisor "Lista de gastos" */
+.sectionDivider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin-top: 40px;
+  margin-bottom: 25px;
+  color: #444; /* Color de texto más oscuro */
+  font-size: 1.3rem; 
+  font-weight: 600; /* Más peso */
+}
+
+.sectionDivider::before,
+.sectionDivider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #e0e0e0; /* Línea más suave */
+}
+
+.sectionDivider span {
+  padding: 0 20px; 
+}
+
+/* Filtros */
+.filtros {
+  display: flex;
+  justify-content: flex-end;
+  align-items: baseline; /* Alineación por línea base para filtros también */
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.filtros select,
+.filtros input[type="date"] {
+  min-width: 180px;
+  flex-grow: 0;
+}
+
+/* Lista de gastos */
+.lista-gastos {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.lista-gastos li {
+  padding: 15px;
+  margin-bottom: 12px;
+  background-color: #fdfdfd; /* Fondo casi blanco */
+  border: 1px solid #eee; /* Borde sutil alrededor */
+  border-left: 5px solid #ff3b3b; /* Borde de marca */
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center; /* Centra verticalmente el .gastoInfo y .acciones */
+  flex-wrap: wrap; /* Permite wrap si no hay espacio */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.06);
+  transition: box-shadow 0.2s ease-in-out;
+}
+.lista-gastos li:hover {
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+.noGastos { /* Estilo para el item "No hay gastos" */
+    justify-content: center;
+    color: #777;
+    font-style: italic;
+    border-left-color: #ccc; /* Diferente color de borde si no hay gastos */
+}
+
+
+.gastoInfo {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  gap: 5px;
+  padding-right: 15px; /* Espacio antes de los botones de acción */
+  min-width: 200px; /* Para evitar que se comprima demasiado */
+}
+
+.gastoConcepto {
+  font-size: 1.05rem; /* Ligeramente más grande */
+  font-weight: 600;
+  color: #2c3e50; /* Azul oscuro para el concepto */
+  word-break: break-word;
+}
+
+.gastoMonto {
+  font-size: 1.1rem; /* Un poco más grande para el monto */
+  font-weight: bold;
+  color: #e74c3c; /* Rojo para el monto, consistente con la marca */
+}
+
+.gastoDetalles {
+  display: flex;
+  flex-wrap: wrap; /* Permite que tipo y fecha se envuelvan si es necesario */
+  gap: 6px 12px; /* Espacio vertical y horizontal */
+  font-size: 0.8rem; /* Más pequeño para detalles */
+  color: #7f8c8d; /* Gris para detalles */
+  align-items: center;
+}
+
+.gastoTipo {
+  background-color: #ecf0f1; /* Fondo gris claro para tipo */
+  padding: 3px 8px;
+  border-radius: 12px; /* Más redondeado para efecto "tag" */
+  text-transform: capitalize;
+  font-weight: 500;
+  color: #34495e; /* Color de texto para el tag */
+}
+
+
+
+.acciones {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0; /* No se encoge */
+  margin-top: 5px; /* Margen si los elementos de info son muy altos y esto wrappea */
+}
+
+/* Botón de acción base en la lista */
+.botonAccion {
+  padding: 7px 14px; /* Ligeramente más grandes */
+  font-size: 0.85rem; /* Un poco más pequeño que el principal */
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+  text-transform: capitalize;
+}
+.botonAccion:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.botonAccion:disabled { /* Para el botón guardar mientras isSubmitting */
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+
+.botonEditar {
+  background-color: #3498db; /* Azul más brillante */
+  color: white;
+}
+.botonEditar:hover {
+  background-color: #2980b9;
+}
+
+.botonEliminar {
+  background-color: #95a5a6; /* Gris más claro */
+  color: white;
+}
+.botonEliminar:hover {
+  background-color: #7f8c8d;
+}
+
+/* Estilos para la sección de edición dentro de un <li> */
+.editando-item-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column; /* Inputs arriba, botones de acción abajo */
+  gap: 10px;
+}
+
+.editando-inputs {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+    align-items: baseline; /* Alinear inputs de edición */
+}
+
+.editando-inputs input,
+.editando-inputs select {
+  padding: 0 10px;
+  font-size: 0.9rem;
+  line-height: 38px; /* Para altura de 40px */
+  height: 40px; /* Altura para inputs de edición */
+  border: 1px solid #bdc3c7; /* Borde un poco más visible */
+  border-radius: 6px;
+  background-color: #fff;
+  width: 100%;
+  box-sizing: border-box;
+}
+.editando-inputs input:focus,
+.editando-inputs select:focus {
+    border-color: #3498db; /* Azul para focus en edición */
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+    outline: none;
+}
+
+.editando-acciones {
+  display: flex;
+  justify-content: flex-end; /* Alinea botones de Guardar/Cancelar a la derecha */
+  gap: 10px;
+  width: 100%;
+}
+
+.botonGuardar { /* Hereda de botonAccion */
+  background-color: #2ecc71; /* Verde más brillante */
+  color: white;
+}
+.botonGuardar:hover {
+  background-color: #27ae60;
+}
+
+.botonCancelarEdicion { /* Hereda de botonAccion */
+  background-color: #e0e0e0; /* Gris claro para cancelar */
+  color: #333;
+}
+.botonCancelarEdicion:hover {
+  background-color: #c7c7c7;
+}
+
+
+.error-message {
+  color: #c0392b; 
+  background-color: #fadbd8;
+  border: 1px solid #c0392b;
+  padding: 12px; /* Más padding */
+  margin: 20px 0; /* Más margen */
+  border-radius: 8px;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.loading-message {
+  text-align: center;
+  padding: 25px;
+  font-style: italic;
+  color: #555;
+  font-size: 1.1rem;
+}

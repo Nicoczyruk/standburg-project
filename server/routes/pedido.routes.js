@@ -23,4 +23,6 @@ router.post('/', /* authMiddleware.isLoggedIn, */ pedidoController.crearPedido);
 
 router.put('/:id/estado', /* authMiddleware.isLoggedIn, */ pedidoController.actualizarEstadoPedido);
 
+
+
 module.exports = router;

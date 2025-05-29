@@ -1,0 +1,165 @@
+/* client/src/views/ConfirmarPedidosClientes.module.css */
+
+/* Contenedor principal de la vista */
+.confirmar-pedidos-container {
+  padding: 2rem;
+  background-color: white; /* Original */
+  color: black; /* Original */
+  min-height: 100vh;
+  font-family: 'Roboto', sans-serif; /* Original */
+}
+
+/* Título principal de la página */
+.confirmar-pedidos-container h1 {
+  color: #c40000; /* Original */
+  margin-bottom: 2.5rem; /* Un poco más de espacio */
+  text-align: center;
+  font-size: 2.2rem; /* Tamaño consistente para títulos principales */
+  font-weight: 700;
+}
+
+/* Contenedor de la lista de tarjetas de pedido */
+.lista-pedidos-confirmar {
+  display: grid;
+  /* Crea columnas de tarjetas, con un mínimo de 300px y máximo 1fr (fracción del espacio) */
+  /* Se ajustarán automáticamente según el ancho disponible */
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2rem; /* Espacio entre tarjetas */
+}
+
+/* Tarjeta individual para cada pedido */
+.pedido-card-confirmar {
+  background-color: #f8f8f8; /* Original */
+  border: 1px solid #ddd;    /* Original */
+  padding: 1.5rem;           /* Original */
+  border-radius: 10px;       /* Un poco más redondeado que los 8px originales */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Sombra sutil para profundidad */
+  display: flex;
+  flex-direction: column; /* Apila los elementos verticalmente */
+  gap: 1rem; /* Espacio entre secciones dentro de la tarjeta */
+}
+
+.pedido-card-confirmar h2 {
+  font-size: 1.4rem;
+  color: #333; /* Un color oscuro pero no el rojo principal */
+  margin-bottom: 0.5rem; /* Menos margen si hay gap en el flex container */
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.5rem;
+}
+
+/* Sección de información del cliente y pedido */
+.info-pedido {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem; /* Espacio entre cada línea de información */
+}
+
+.info-pedido p {
+  display: flex; /* Para alinear etiqueta y valor */
+  justify-content: flex-start; /* Alinea al inicio */
+  align-items: baseline; /* Alinea por la línea base del texto */
+  margin: 0; /* Quitamos margen por defecto de p ya que usamos gap */
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.info-pedido p strong {
+  flex-basis: 120px; /* Ancho base para las etiquetas (Cliente:, Teléfono:, etc.) */
+  min-width: 120px;  /* Asegura que las etiquetas tengan este ancho mínimo */
+  margin-right: 10px;
+  color: #555; /* Un gris oscuro para las etiquetas */
+  font-weight: 600; /* Un poco más de peso */
+}
+
+/* Título "Productos:" */
+.titulo-productos {
+  font-size: 1.2rem;
+  color: #333;
+  margin-top: 0.5rem; /* Ajustar espacio */
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+/* Lista de productos dentro de la tarjeta */
+.lista-productos-pedido {
+  list-style-type: none; /* Quitar viñetas por defecto */
+  padding-left: 0; /* Quitar padding por defecto */
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* Espacio entre productos */
+}
+
+.lista-productos-pedido li {
+  font-size: 0.9rem;
+  background-color: #fff; /* Fondo blanco para cada item de producto */
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  border: 1px solid #e7e7e7;
+}
+
+.nota-producto {
+  font-style: italic;
+  color: #777; /* Color más sutil para la nota del producto */
+  margin-left: 5px;
+  font-size: 0.85rem;
+}
+
+/* Botón de confirmar pedido */
+.boton-confirmar {
+  background-color: #c40000; /* Original */
+  color: white;               /* Original */
+  border: none;               /* Original */
+  padding: 0.8rem 1.2rem;     /* Original */
+  border-radius: 8px;         /* Original */
+  cursor: pointer;            /* Original */
+  margin-top: auto; /* Empuja el botón al final de la tarjeta si es un flex item */
+  transition: background-color 0.3s, transform 0.1s ease; /* background ya estaba, añado transform */
+  font-weight: 600;
+  width: 100%; /* Que ocupe todo el ancho de la tarjeta */
+}
+
+.boton-confirmar:hover {
+  background-color: #a30000; /* Original */
+  transform: translateY(-1px); /* Ligero efecto de elevación */
+}
+
+.boton-confirmar:disabled {
+  background-color: #e0e0e0; /* Un gris para el estado desactivado */
+  color: #9e9e9e;
+  cursor: not-allowed;
+  transform: none;
+}
+
+
+/* Mensajes de carga, error, etc. */
+.loading-message,
+.error-message,
+.no-pedidos-mensaje,
+.no-detalles-mensaje {
+  padding: 1.5rem; /* Más padding */
+  margin: 2rem auto; /* Centrado y con margen */
+  text-align: center;
+  border-radius: 8px; /* Consistente con tarjetas */
+  max-width: 600px; /* Para que no sea pantalla completa */
+}
+
+.loading-message {
+  color: #555;
+  font-style: italic;
+  background-color: #f0f0f0; /* Fondo ligero */
+}
+
+.error-message {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.no-pedidos-mensaje,
+.no-detalles-mensaje {
+  color: #777;
+  background-color: #e9ecef; /* Fondo diferente para mensajes informativos */
+  padding: 1rem;
+}

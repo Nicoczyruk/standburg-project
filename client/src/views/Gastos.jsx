@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './Gastos.css';
+import styles from './Gastos.module.css';
 
 const Gastos = () => {
   const [gastos, setGastos] = useState([]);
@@ -15,6 +15,7 @@ const Gastos = () => {
   const [editandoId, setEditandoId] = useState(null);
   const [gastoEditado, setGastoEditado] = useState({ concepto: '', monto: '', fecha_gasto: '', tipo_gasto: '' });
 
+  // --- Funciones (fetchGastos, handleSubmit, etc. se mantienen igual que antes) ---
   const fetchGastos = async () => {
     setLoading(true);
     setError(null);
@@ -28,6 +29,7 @@ const Gastos = () => {
       setGastos(data || []);
     } catch (err) {
       setError(err.message);
+      setGastos([]);
     } finally {
       setLoading(false);
     }
@@ -38,52 +40,29 @@ const Gastos = () => {
   }, []);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNuevoGasto(prev => ({ ...prev, [name]: value }));
+    setNuevoGasto({ ...nuevoGasto, [e.target.name]: e.target.value });
   };
 
-  const handleEditChange = (e) => {
-    const { name, value } = e.target;
-    setGastoEditado(prev => ({ ...prev, [name]: value }));
-  };
-
-  const agregarGasto = async () => {
-    if (!nuevoGasto.concepto.trim() || !nuevoGasto.monto.trim() || !nuevoGasto.fecha_gasto) {
-      setSubmitError('Concepto, Monto y Fecha son obligatorios.');
-      return;
-    }
-
-    const montoFloat = parseFloat(nuevoGasto.monto);
-    if (isNaN(montoFloat) || montoFloat <= 0) {
-      setSubmitError('El monto debe ser un número positivo.');
-      return;
-    }
-
-    setSubmitError(null);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     setIsSubmitting(true);
-
-    const payload = {
-      tipo_gasto: nuevoGasto.tipo_gasto,
-      concepto: nuevoGasto.concepto.trim(),
-      monto: montoFloat,
-      fecha_gasto: nuevoGasto.fecha_gasto
-    };
-
+    setSubmitError(null);
     try {
       const response = await fetch('/api/gastos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          ...nuevoGasto,
+          monto: parseFloat(nuevoGasto.monto) || 0,
+          fecha_gasto: nuevoGasto.fecha_gasto || null,
+        }),
       });
-
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Error al agregar gasto' }));
-        throw new Error(errorData.message || `Error ${response.status}`);
+        const errData = await response.json().catch(() => ({ message: 'Error al agregar el gasto' }));
+        throw new Error(errData.message || `Error ${response.status}`);
       }
-
-      await fetchGastos();
+      fetchGastos();
       setNuevoGasto({ tipo_gasto: 'fijo', concepto: '', monto: '', fecha_gasto: '' });
-      alert('Gasto agregado exitosamente!');
     } catch (err) {
       setSubmitError(err.message);
     } finally {
@@ -91,127 +70,154 @@ const Gastos = () => {
     }
   };
 
+  const eliminarGasto = async (id) => {
+    // Confirmación antes de eliminar (opcional pero recomendado)
+    // if (!window.confirm("¿Estás seguro de que quieres eliminar este gasto?")) {
+    //   return;
+    // }
+    try {
+      const response = await fetch(`/api/gastos/${id}`, { method: 'DELETE' });
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({ message: 'Error al eliminar el gasto' }));
+        throw new Error(errData.message || `Error ${response.status}`);
+      }
+      fetchGastos();
+    } catch (err) {
+      setError(err.message); 
+    }
+  };
+
   const editarGasto = (gasto) => {
     setEditandoId(gasto.gasto_id);
     setGastoEditado({
       concepto: gasto.concepto,
-      monto: gasto.monto,
-      fecha_gasto: gasto.fecha_gasto?.substring(0, 10) || '',
-      tipo_gasto: gasto.tipo_gasto
+      monto: gasto.monto.toString(),
+      fecha_gasto: gasto.fecha_gasto ? new Date(gasto.fecha_gasto).toISOString().split('T')[0] : '',
+      tipo_gasto: gasto.tipo_gasto,
     });
   };
 
-  const guardarEdicion = async (id) => {
-    const payload = {
-      ...gastoEditado,
-      monto: parseFloat(gastoEditado.monto)
-    };
+  const handleEditChange = (e) => {
+    setGastoEditado({ ...gastoEditado, [e.target.name]: e.target.value });
+  };
 
+  const guardarEdicion = async (id) => {
+    setIsSubmitting(true); 
     try {
       const response = await fetch(`/api/gastos/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          ...gastoEditado,
+          monto: parseFloat(gastoEditado.monto) || 0,
+          fecha_gasto: gastoEditado.fecha_gasto || null,
+        }),
       });
-
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Error al editar gasto' }));
-        throw new Error(errorData.message || `Error ${response.status}`);
+        const errData = await response.json().catch(() => ({ message: 'Error al actualizar el gasto' }));
+        throw new Error(errData.message || `Error ${response.status}`);
       }
-
-      await fetchGastos();
       setEditandoId(null);
+      fetchGastos();
     } catch (err) {
-      alert('Error al editar gasto: ' + err.message);
+      // Mostrar error de edición específico si se desea
+      setSubmitError(`Error al guardar: ${err.message}`); // Reutilizar submitError o crear uno nuevo
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const eliminarGasto = async (id) => {
-    if (!window.confirm('¿Estás seguro de que deseas eliminar este gasto?')) return;
-
-    try {
-      const response = await fetch(`/api/gastos/${id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Error al eliminar gasto');
-      }
-
-      await fetchGastos();
-    } catch (err) {
-      alert('Error al eliminar gasto: ' + err.message);
-    }
-  };
-
-  const gastosFiltrados = gastos.filter((g) => {
-    const cumpleTipo = filtroTipo === 'todos' || g.tipo_gasto === filtroTipo;
-    const cumpleFecha = !filtroFecha || g.fecha_gasto?.startsWith(filtroFecha);
-    return cumpleTipo && cumpleFecha;
+  const gastosFiltrados = gastos.filter(g => {
+    const coincideTipo = filtroTipo === 'todos' || g.tipo_gasto === filtroTipo;
+    const coincideFecha = !filtroFecha || (g.fecha_gasto && g.fecha_gasto.startsWith(filtroFecha));
+    return coincideTipo && coincideFecha;
   });
 
   return (
-    <div className="gastos-container">
-      <h1>Gastos</h1>
-      {error && <p style={{ color: 'red' }}>Error al cargar datos: {error}</p>}
+    <div className={styles['gastos-container']}>
+      <h1>Gestión de Gastos</h1>
 
-      <div className="form-gasto">
-        <select name="tipo_gasto" value={nuevoGasto.tipo_gasto} onChange={handleInputChange} disabled={isSubmitting}>
+      <form onSubmit={handleSubmit} className={styles['form-gasto']}>
+        <select name="tipo_gasto" value={nuevoGasto.tipo_gasto} onChange={handleInputChange}>
           <option value="fijo">Fijo</option>
           <option value="variable">Variable</option>
         </select>
-        <input type="text" name="concepto" placeholder="Concepto" value={nuevoGasto.concepto} onChange={handleInputChange} disabled={isSubmitting} />
-        <input type="number" name="monto" placeholder="Monto" step="0.01" value={nuevoGasto.monto} onChange={handleInputChange} disabled={isSubmitting} />
-        <input type="date" name="fecha_gasto" value={nuevoGasto.fecha_gasto} onChange={handleInputChange} disabled={isSubmitting} />
-        <button onClick={agregarGasto} disabled={isSubmitting}>
-          {isSubmitting ? 'Agregando...' : 'Agregar Gasto'}
+        <input name="concepto" value={nuevoGasto.concepto} onChange={handleInputChange} placeholder="Concepto" required />
+        <input name="monto" type="number" value={nuevoGasto.monto} onChange={handleInputChange} placeholder="Monto" required step="0.01" />
+        <input name="fecha_gasto" type="date" value={nuevoGasto.fecha_gasto} onChange={handleInputChange} />
+        <button type="submit" disabled={isSubmitting} className={styles.formSubmitButton}>
+            {isSubmitting ? 'Agregando...' : 'Agregar Gasto'}
         </button>
-      </div>
-      {submitError && <p style={{ color: 'red' }}>{submitError}</p>}
+      </form>
+      {submitError && <p className={styles['error-message']}>{submitError}</p>}
 
-      <div className="filtros">
-        <select value={filtroTipo} onChange={(e) => setFiltroTipo(e.target.value)}>
-          <option value="todos">Todos</option>
+      <div className={styles.sectionDivider}>
+        <span>Lista de gastos</span>
+      </div>
+
+      <div className={styles.filtros}>
+        <select onChange={(e) => setFiltroTipo(e.target.value)} value={filtroTipo}>
+          <option value="todos">Todos los Tipos</option>
           <option value="fijo">Fijo</option>
           <option value="variable">Variable</option>
         </select>
-        <input type="date" value={filtroFecha} onChange={(e) => setFiltroFecha(e.target.value)} />
+        <input type="date" onChange={(e) => setFiltroFecha(e.target.value)} value={filtroFecha} />
       </div>
 
-      {loading && gastos.length > 0 && <p>Actualizando lista...</p>}
-
-      <ul className="lista-gastos">
-        {gastosFiltrados.length > 0 ? (
-          gastosFiltrados.map((g) => (
+      {loading && <p className={styles['loading-message']}>Cargando gastos...</p>}
+      {error && !loading && <p className={styles['error-message']}>{error}</p>}
+      
+      {!loading && !error && (
+        <ul className={styles['lista-gastos']}>
+          {gastosFiltrados.length > 0 ? gastosFiltrados.map(g => (
             <li key={g.gasto_id}>
               {editandoId === g.gasto_id ? (
-                <>
-                  <select name="tipo_gasto" value={gastoEditado.tipo_gasto} onChange={handleEditChange}>
-                    <option value="fijo">Fijo</option>
-                    <option value="variable">Variable</option>
-                  </select>
-                  <input name="concepto" value={gastoEditado.concepto} onChange={handleEditChange} />
-                  <input name="monto" type="number" value={gastoEditado.monto} onChange={handleEditChange} />
-                  <input name="fecha_gasto" type="date" value={gastoEditado.fecha_gasto} onChange={handleEditChange} />
-                  <button onClick={() => guardarEdicion(g.gasto_id)}>Guardar</button>
-                  <button onClick={() => setEditandoId(null)}>Cancelar</button>
-                </>
+                <div className={styles['editando-item-container']}> {/* Contenedor para toda la fila de edición */}
+                  <div className={styles['editando-inputs']}>
+                    <select name="tipo_gasto" value={gastoEditado.tipo_gasto} onChange={handleEditChange}>
+                      <option value="fijo">Fijo</option>
+                      <option value="variable">Variable</option>
+                    </select>
+                    <input name="concepto" value={gastoEditado.concepto} onChange={handleEditChange} placeholder="Concepto"/>
+                    <input name="monto" type="number" value={gastoEditado.monto} onChange={handleEditChange} step="0.01" placeholder="Monto"/>
+                    <input name="fecha_gasto" type="date" value={gastoEditado.fecha_gasto} onChange={handleEditChange} />
+                  </div>
+                  <div className={styles['editando-acciones']}> {/* Div específico para acciones de edición */}
+                    <button 
+                        onClick={() => guardarEdicion(g.gasto_id)} 
+                        className={`${styles.botonAccion} ${styles.botonGuardar}`} // Clases combinadas
+                        disabled={isSubmitting}>
+                      {isSubmitting ? '...' : 'Guardar'}
+                    </button>
+                    <button 
+                        onClick={() => setEditandoId(null)} 
+                        className={`${styles.botonAccion} ${styles.botonCancelarEdicion}`}> {/* Clase específica para cancelar */}
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
               ) : (
-                <>
-                  [{g.tipo_gasto}] {g.concepto}: ${parseFloat(g.monto).toFixed(2)}
-                  {g.fecha_gasto ? ` - ${new Date(g.fecha_gasto).toLocaleDateString()}` : ''}
-                  <div style={{ marginTop: '5px' }}>
-                    <button onClick={() => editarGasto(g)}>Editar</button>
-                    <button onClick={() => eliminarGasto(g.gasto_id)} style={{ backgroundColor: '#999' }}>Eliminar</button>
+                <> {/* Estructura mejorada para mostrar información del gasto */}
+                  <div className={styles.gastoInfo}>
+                    <span className={styles.gastoConcepto}>{g.concepto}</span>
+                    <span className={styles.gastoMonto}>${parseFloat(g.monto).toFixed(2)}</span>
+                    <div className={styles.gastoDetalles}>
+                      <span className={styles.gastoTipo}>{g.tipo_gasto}</span>
+                      {g.fecha_gasto && <span className={styles.gastoFecha}>{new Date(g.fecha_gasto).toLocaleDateString()}</span>}
+                    </div>
+                  </div>
+                  <div className={styles.acciones}>
+                    <button onClick={() => editarGasto(g)} className={`${styles.botonAccion} ${styles.botonEditar}`}>Editar</button>
+                    <button onClick={() => eliminarGasto(g.gasto_id)} className={`${styles.botonAccion} ${styles.botonEliminar}`}>Eliminar</button>
                   </div>
                 </>
               )}
             </li>
-          ))
-        ) : (
-          <li>No hay gastos para mostrar con el filtro actual.</li>
-        )}
-      </ul>
+          )) : (
+            <li className={styles.noGastos}>No hay gastos para mostrar con el filtro actual.</li>
+          )}
+        </ul>
+      )}
     </div>
   );
 };

@@ -1,20 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import './confirmarPedidosClientes.css'; // Asegúrate que este CSS exista
+import styles from './ConfirmarPedidosClientes.module.css'; // Importa el CSS Module
 
 const ConfirmarPedidosClientes = () => {
   const [pedidosPorConfirmar, setPedidosPorConfirmar] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [updatingId, setUpdatingId] = useState(null); // ID del pedido que se está actualizando
+  const [updatingId, setUpdatingId] = useState(null);
 
-  // Función para cargar los pedidos "A CONFIRMAR" y sus detalles
   const fetchPedidosAConfirmar = async () => {
     setLoading(true);
     setError(null);
     try {
-      // 1. Obtener todos los pedidos
-      const response = await fetch('/api/pedidos?estado=A CONFIRMAR'); // Filtrar por estado 'A CONFIRMAR'
+      const response = await fetch('/api/pedidos?estado=A CONFIRMAR');
       if (!response.ok) {
         const errData = await response.json().catch(() => ({}));
         throw new Error(`Error ${response.status}: ${errData.message || 'No se pudieron cargar los pedidos por confirmar'}`);
@@ -27,129 +25,114 @@ const ConfirmarPedidosClientes = () => {
         return;
       }
 
-      // 2. Para cada pedido "A CONFIRMAR", obtener sus detalles (productos)
-      // ESTO PUEDE SER INEFICIENTE SI HAY MUCHOS PEDIDOS. Considera optimizar el backend después.
-      const pedidosConDetalles = await Promise.all(
-        pedidosData.map(async (pedido) => {
+      // Para cada pedido, obtener su información completa que incluye los detalles
+      const pedidosConDetallesCompletos = await Promise.all(
+        pedidosData.map(async (pedidoDeLista) => {
           try {
-            const detalleResponse = await fetch(`/api/pedidos/${pedido.pedido_id}`);
-            if (!detalleResponse.ok) {
-              console.warn(`No se pudieron cargar detalles para pedido #${pedido.pedido_id}`);
-              return { ...pedido, detalles: [] }; // Devolver pedido sin detalles en caso de error
+            // CORRECCIÓN: Llamar a la ruta que devuelve el pedido completo con sus detalles
+            const responsePedidoCompleto = await fetch(`/api/pedidos/${pedidoDeLista.pedido_id}`);
+            if (!responsePedidoCompleto.ok) {
+              console.error(`Error al cargar pedido completo para ID ${pedidoDeLista.pedido_id}: ${responsePedidoCompleto.status}`);
+              // Devolver el objeto original de la lista con detalles vacíos como fallback
+              return { ...pedidoDeLista, detalles: [] }; 
             }
-            const pedidoCompleto = await detalleResponse.json();
-            return pedidoCompleto; // pedidoCompleto ya debería tener la propiedad 'detalles'
-          } catch (detalleError) {
-            console.warn(`Error cargando detalles para pedido #${pedido.pedido_id}:`, detalleError);
-            return { ...pedido, detalles: [] }; // Fallback
+            const pedidoCompleto = await responsePedidoCompleto.json();
+            // pedidoCompleto ahora ES el objeto del pedido que contiene la propiedad 'detalles' (ej. pedidoCompleto.detalles)
+            // y también el resto de la información del pedido.
+            return pedidoCompleto; 
+          } catch (err) {
+            console.error(`Excepción al cargar pedido completo para ID ${pedidoDeLista.pedido_id}:`, err);
+            return { ...pedidoDeLista, detalles: [] }; // Fallback
           }
         })
       );
-      setPedidosPorConfirmar(pedidosConDetalles.filter(p => p && p.estado === 'A CONFIRMAR')); // Doble chequeo de estado
+      setPedidosPorConfirmar(pedidosConDetallesCompletos);
     } catch (err) {
-      console.error("Error al obtener pedidos por confirmar:", err);
+      console.error("Error en fetchPedidosAConfirmar:", err);
       setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  // Cargar pedidos al montar el componente
   useEffect(() => {
     fetchPedidosAConfirmar();
   }, []);
 
- const confirmarEstePedido = async (pedidoId) => {
-  setUpdatingId(pedidoId);
-  setError(null);
-  const nuevoEstado = 'en preparacion'; // O 'en preparacion' según tu flujo
-
-  try {
-    const response = await fetch(`/api/pedidos/${pedidoId}/estado`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ estado: nuevoEstado })
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(`Error ${response.status}: ${errorData.message || `No se pudo confirmar el pedido #${pedidoId}`}`);
+  const confirmarEstePedido = async (pedidoId) => {
+    setUpdatingId(pedidoId);
+    setError(null);
+    try {
+      const response = await fetch(`/api/pedidos/${pedidoId}/estado`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ estado: 'en preparacion' }),
+      });
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(`Error ${response.status}: ${errData.message || 'No se pudo confirmar el pedido'}`);
+      }
+      toast.success(`Pedido ${pedidoId} confirmado y pasado a EN PREPARACION.`);
+      setPedidosPorConfirmar(prevPedidos => prevPedidos.filter(p => p.pedido_id !== pedidoId));
+    } catch (err) {
+      console.error("Error al confirmar pedido:", err);
+      toast.error(`Error al confirmar pedido ${pedidoId}: ${err.message}`);
+    } finally {
+      setUpdatingId(null);
     }
+  };
 
-    // ✅ Éxito: mostrar notificación y recargar pedidos
-    toast.success(`Pedido #${pedidoId} confirmado y pasado a estado ${nuevoEstado}.`);
-    await fetchPedidosAConfirmar();
-
-  } catch (err) {
-    console.error(`Error al confirmar el pedido ${pedidoId}:`, err);
-    setError(err.message);
-  } finally {
-    setUpdatingId(null);
-  }
-};
-
-
-  // --- Renderizado ---
-  if (loading) {
-    return (
-      <div className="confirmar-pedidos-container">
-        <h1>Pedidos Pendientes de Confirmación</h1>
-        <p>Cargando pedidos...</p>
-      </div>
-    );
-  }
-
-  // Error general al cargar la lista inicial
-  if (error && pedidosPorConfirmar.length === 0) {
-    return (
-      <div className="confirmar-pedidos-container">
-        <h1>Pedidos Pendientes de Confirmación</h1>
-        <p style={{ color: 'red' }}>{error}</p>
-      </div>
-    );
-  }
+  if (loading) return <div className={styles['confirmar-pedidos-container']}><p className={styles['loading-message']}>Cargando pedidos por confirmar...</p></div>;
+  if (error && pedidosPorConfirmar.length === 0 && !loading) return <div className={styles['confirmar-pedidos-container']}><p className={styles['error-message']}>Error al cargar pedidos: {error}</p></div>;
 
   return (
-    <div className="confirmar-pedidos-container">
-      <h1>Pedidos Pendientes de Confirmación</h1>
-      {/* Mostrar error de actualización si ocurrió */}
-      {error && <p style={{ color: 'orange', fontWeight: 'bold' }}>{error}</p>}
+    <div className={styles['confirmar-pedidos-container']}>
+      <h1>Confirmar Pedidos de Clientes</h1>
+      
+      {pedidosPorConfirmar.length === 0 && !loading && !error && (
+        <p className={styles['no-pedidos-mensaje']}>No hay pedidos pendientes de confirmación.</p>
+      )}
 
-      {pedidosPorConfirmar.length === 0 ? (
-        <p>No hay pedidos de clientes para confirmar en este momento.</p>
-      ) : (
-        pedidosPorConfirmar.map((pedido) => (
-          <div key={pedido.pedido_id} className="pedido-card" style={{ opacity: updatingId === pedido.pedido_id ? 0.5 : 1 }}>
-            <h2>Pedido Cliente: #{pedido.pedido_id}</h2>
-            <p><strong>Cliente:</strong> {pedido.cliente_nombre || 'N/A'}</p>
-            <p><strong>Teléfono:</strong> {pedido.cliente_telefono || 'N/A'}</p>
-            <p><strong>Dirección:</strong> {pedido.cliente_direccion || 'N/A (Mostrador o datos no provistos)'}</p>
-            <p><strong>Tipo:</strong> {pedido.tipo || 'N/A'}</p>
-            <p><strong>Notas:</strong> {pedido.notas || 'Sin notas'}</p>
-            <p><strong>Total Estimado:</strong> ${pedido.total ? pedido.total.toFixed(2) : 'N/A'}</p>
+      <div className={styles['lista-pedidos-confirmar']}>
+        {pedidosPorConfirmar.map(pedido => (
+          // El objeto 'pedido' aquí ya debería tener la propiedad 'detalles' poblada
+          <div key={pedido.pedido_id} className={styles['pedido-card-confirmar']}>
+            <h2>Pedido ID: {pedido.pedido_id}</h2>
+            <div className={styles['info-pedido']}>
+              <p><strong>Cliente:</strong> {pedido.cliente_nombre || 'N/A'}</p>
+              <p><strong>Teléfono:</strong> {pedido.cliente_telefono || 'N/A'}</p>
+              <p><strong>Dirección:</strong> {pedido.cliente_direccion || 'N/A (Mostrador o datos no provistos)'}</p>
+              <p><strong>Tipo:</strong> {pedido.tipo_pedido || pedido.tipo || 'N/A'}</p>
+              <p><strong>Notas:</strong> {pedido.notas || 'Sin notas'}</p>
+              <p><strong>Total Estimado:</strong> ${pedido.total_pedido ? parseFloat(pedido.total_pedido).toFixed(2) : (pedido.total ? parseFloat(pedido.total).toFixed(2) : '0.00')}</p>
+            </div>
             
-            <h4>Productos:</h4>
+            <h4 className={styles['titulo-productos']}>Productos:</h4>
+            {/* La propiedad 'detalles' ahora viene del objeto 'pedido' que fue completamente recargado */}
             {pedido.detalles && pedido.detalles.length > 0 ? (
-              <ul>
+              <ul className={styles['lista-productos-pedido']}>
                 {pedido.detalles.map(detalle => (
-                  <li key={detalle.detalle_id}>
-                    {detalle.cantidad} x {detalle.producto_nombre} (@ ${detalle.precio_unitario ? detalle.precio_unitario.toFixed(2) : 'N/A'})
+                  <li key={detalle.detalle_id || detalle.producto_id}>
+                    {detalle.cantidad} x {detalle.nombre_producto || detalle.nombre || detalle.producto_nombre}
+                    (@ ${detalle.precio_unitario ? parseFloat(detalle.precio_unitario).toFixed(2) : (detalle.precio ? parseFloat(detalle.precio).toFixed(2) : '0.00')})
+                    {detalle.notas_producto && <span className={styles['nota-producto']}> ({detalle.notas_producto})</span>}
                   </li>
                 ))}
               </ul>
             ) : (
-              <p>No se pudieron cargar los detalles de productos para este pedido o no tiene.</p>
+              <p className={styles['no-detalles-mensaje']}>No hay detalles de productos para este pedido o no se pudieron cargar.</p>
             )}
             
             <button 
               onClick={() => confirmarEstePedido(pedido.pedido_id)}
               disabled={updatingId === pedido.pedido_id}
+              className={styles['boton-confirmar']}
             >
-              {updatingId === pedido.pedido_id ? 'Confirmando...' : 'Confirmar Pedido'}
+              {updatingId === pedido.pedido_id ? 'Confirmando...' : 'Confirmar pedido'}
             </button>
           </div>
-        ))
-      )}
+        ))}
+      </div>
     </div>
   );
 };

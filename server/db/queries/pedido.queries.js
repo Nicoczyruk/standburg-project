@@ -236,11 +236,41 @@ const createPedidoConPagoTransaction = async ({
     }
 };
 
+// --- NUEVA FUNCIÓN DE CONSULTA PARA GESTIÓN DE PEDIDOS CONFIRMADOS ---
+const getPedidosParaGestionConDetalles = async (estado) => {
+    try {
+        const queryString = `
+            SELECT
+                P.pedido_id, P.mesa_id, M.numero_mesa, P.fecha_hora AS fecha, P.total AS total_pedido, P.estado AS estado_pedido,
+                P.notas, P.cliente_nombre, P.cliente_telefono, P.cliente_direccion, P.tipo, 
+                -- Se eliminó P.estado_previo_cancelacion de esta línea
+                DP.detalle_id AS id_detalle_pedido, DP.producto_id AS id_producto, PR.nombre AS nombre_producto,
+                PR.descripcion AS descripcion_producto, PR.precio AS precio_producto_actual,
+                PR.categoria_id AS id_categoria, CAT.nombre AS nombre_categoria, 
+                DP.cantidad, DP.precio_unitario, DP.subtotal
+            FROM PEDIDOS P
+            LEFT JOIN MESAS M ON P.mesa_id = M.mesa_id 
+            INNER JOIN DETALLE_PEDIDO DP ON P.pedido_id = DP.pedido_id
+            INNER JOIN PRODUCTOS PR ON DP.producto_id = PR.producto_id
+            INNER JOIN CATEGORIA CAT ON PR.categoria_id = CAT.categoria_id 
+            WHERE P.estado = @estado_gestion 
+            ORDER BY P.fecha_hora DESC;
+        `;
+        const { recordset } = await db.query(queryString, { estado_gestion: { type: sql.VarChar, value: estado } });
+        return recordset;
+    } catch (error) {
+        console.error(`Error al obtener pedidos para gestión con estado ${estado}:`, error);
+        throw error;
+    }
+};
+
 
 module.exports = {
     getAllPedidos,
     getPedidoById,
     updatePedidoEstado,
-    createPedidoConPagoTransaction, 
-    METODOS_PAGO_VALIDOS
+    createPedidoConPagoTransaction,
+    getPedidosParaGestionConDetalles,
+    METODOS_PAGO_VALIDOS,
+    
 };

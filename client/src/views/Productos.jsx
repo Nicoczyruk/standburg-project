@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import './Productos.css';
+// import './Productos.css'; // Se comenta o elimina la importación antigua
+import styles from './Productos.module.css'; // NUEVA IMPORTACIÓN del CSS Module
 
 const Productos = () => {
   // --- Estados ---
@@ -15,7 +16,7 @@ const Productos = () => {
     costo: '',
     categoria_id: '',
     descripcion: '',
-    imagen: null, // Nuevo campo para imagen
+    imagen: null,
   });
 
   const [categorias, setCategorias] = useState([]);
@@ -49,66 +50,48 @@ const Productos = () => {
       const data = await res.json();
       setCategorias(data);
     } catch (e) {
-      setError(e.message);
+      console.error("Error en fetchCategorias:", e);
     } finally {
       setLoadingCategorias(false);
     }
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNuevoProducto(prev => ({ ...prev, [name]: value }));
+  const handleChange = (e) => {
+    const { name, value, files } = e.target;
+    if (name === "imagen") {
+      setNuevoProducto(prev => ({ ...prev, imagen: files[0] }));
+    } else {
+      setNuevoProducto(prev => ({ ...prev, [name]: value }));
+    }
   };
 
-  const handleFileChange = (e) => {
-    setNuevoProducto(prev => ({ ...prev, imagen: e.target.files[0] }));
-  };
-
-  const agregarProducto = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
     setSubmitError(null);
 
-    if (!nuevoProducto.nombre || !nuevoProducto.precio || !nuevoProducto.categoria_id) {
-      setSubmitError('Nombre, Precio y Categoría son obligatorios.');
-      return;
+    const formData = new FormData();
+    formData.append('nombre', nuevoProducto.nombre);
+    formData.append('precio', nuevoProducto.precio);
+    formData.append('costo', nuevoProducto.costo);
+    formData.append('categoria_id', nuevoProducto.categoria_id);
+    formData.append('descripcion', nuevoProducto.descripcion);
+    if (nuevoProducto.imagen) {
+      formData.append('imagen', nuevoProducto.imagen);
     }
-    if (isNaN(parseFloat(nuevoProducto.precio)) || parseFloat(nuevoProducto.precio) < 0) {
-      setSubmitError('El precio debe ser un número válido no negativo.');
-      return;
-    }
-
-    setIsSubmitting(true);
 
     try {
-      const formData = new FormData();
-      formData.append('nombre', nuevoProducto.nombre.trim());
-      formData.append('precio', parseFloat(nuevoProducto.precio));
-      formData.append('descripcion', nuevoProducto.descripcion.trim());
-      formData.append('categoria_id', parseInt(nuevoProducto.categoria_id));
-      if (nuevoProducto.imagen) formData.append('imagen', nuevoProducto.imagen);
-
       const res = await fetch('/api/productos', {
         method: 'POST',
         body: formData,
       });
 
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
+        const errorData = await res.json().catch(() => ({ message: 'Error desconocido al agregar producto' }));
         throw new Error(errorData.message || 'Error al agregar producto');
       }
-
-      await fetchProductos();
-
-      setNuevoProducto({
-        nombre: '',
-        precio: '',
-        costo: '',
-        categoria_id: '',
-        descripcion: '',
-        imagen: null,
-      });
-
-      alert('¡Producto agregado exitosamente!');
+      fetchProductos();
+      setNuevoProducto({ nombre: '', precio: '', costo: '', categoria_id: '', descripcion: '', imagen: null });
     } catch (e) {
       setSubmitError(e.message);
     } finally {
@@ -117,77 +100,60 @@ const Productos = () => {
   };
 
   return (
-    <div className="productos-container">
-      <h1 className="titulo">Gestión de Productos</h1>
+    <div className={styles['productos-page-container']}>
+      <h1>Gestión de Productos</h1>
 
-      {/* Formulario en card */}
-      <div className="card-form">
+      <div className={styles['form-container']}>
         <h2>Agregar Nuevo Producto</h2>
-        <form onSubmit={agregarProducto} className="form-producto">
-          <input
-            type="text"
-            name="nombre"
-            placeholder="Nombre"
-            value={nuevoProducto.nombre}
-            onChange={handleInputChange}
-            disabled={isSubmitting}
-          />
-          <input
-            type="number"
-            name="precio"
-            placeholder="Precio"
-            step="0.01"
-            value={nuevoProducto.precio}
-            onChange={handleInputChange}
-            disabled={isSubmitting}
-          />
-          <input
-            type="text"
-            name="descripcion"
-            placeholder="Descripción (Opcional)"
-            value={nuevoProducto.descripcion}
-            onChange={handleInputChange}
-            disabled={isSubmitting}
-          />
-          <select
-            name="categoria_id"
-            value={nuevoProducto.categoria_id}
-            onChange={handleInputChange}
-            disabled={loadingCategorias || isSubmitting}
-            required
-          >
-            <option value="" disabled>-- Seleccione Categoría --</option>
-            {loadingCategorias ? (
-              <option disabled>Cargando...</option>
-            ) : (
-              categorias.map(cat => (
-                <option key={cat.categoria_id} value={cat.categoria_id}>
-                  {cat.nombre}
-                </option>
-              ))
+        <form onSubmit={handleSubmit} encType="multipart/form-data">
+          {/* Aplicamos .formFieldGroup a cada div contenedor de label+input */}
+          <div className={styles.formFieldGroup}>
+            <label htmlFor="nombre">Nombre:</label>
+            <input type="text" id="nombre" name="nombre" value={nuevoProducto.nombre} onChange={handleChange} required />
+          </div>
+          <div className={styles.formFieldGroup}>
+            <label htmlFor="precio">Precio:</label>
+            <input type="number" id="precio" name="precio" value={nuevoProducto.precio} onChange={handleChange} required min="0" step="0.01" />
+          </div>
+          <div className={styles.formFieldGroup}>
+            <label htmlFor="costo">Costo:</label>
+            <input type="number" id="costo" name="costo" value={nuevoProducto.costo} onChange={handleChange} min="0" step="0.01" />
+          </div>
+          <div className={styles.formFieldGroup}>
+            <label htmlFor="categoria_id">Categoría:</label>
+            {loadingCategorias ? <p>Cargando categorías...</p> : (
+              <select id="categoria_id" name="categoria_id" value={nuevoProducto.categoria_id} onChange={handleChange} required>
+                <option value="">Seleccione una categoría</option>
+                {categorias.map(cat => (
+                  <option key={cat.categoria_id} value={cat.categoria_id}>{cat.nombre}</option>
+                ))}
+              </select>
             )}
-          </select>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleFileChange}
-            disabled={isSubmitting}
-          />
-          <button type="submit" disabled={isSubmitting}>
+          </div>
+          <div className={styles.formFieldGroup}>
+            <label htmlFor="descripcion">Descripción:</label>
+            {/* Aplicamos .fixedTextarea al textarea */}
+            <textarea id="descripcion" name="descripcion" className={styles.fixedTextarea} value={nuevoProducto.descripcion} onChange={handleChange}></textarea>
+          </div>
+          <div className={styles.formFieldGroup}>
+            <label htmlFor="imagen">Imagen:</label>
+            <input type="file" id="imagen" name="imagen" onChange={handleChange} accept="image/*" />
+          </div>
+          {/* Aplicamos .submitButton al botón */}
+          <button type="submit" disabled={isSubmitting} className={styles.submitButton}>
             {isSubmitting ? 'Agregando...' : 'Agregar Producto'}
           </button>
-          {submitError && <p className="error">{submitError}</p>}
+          {submitError && <p className={styles.error}>{submitError}</p>}
         </form>
       </div>
 
-      {/* Tabla productos */}
-      <div className="tabla-container">
+      <div className={styles['tabla-container']}>
         {loading ? (
           <p>Cargando productos...</p>
         ) : error ? (
-          <p className="error">{error}</p>
+          <p className={styles.error}>{error}</p> 
         ) : (
-          <table className="tabla-productos">
+          <table className={styles['tabla-productos']}>
             <thead>
               <tr>
                 <th>Imagen</th>
@@ -202,7 +168,10 @@ const Productos = () => {
                   <tr key={p.producto_id}>
                     <td>
                       {p.imagen_url ? (
-                      <img src={`/ImagenesProductos/${prod.producto_id}.jpg`} alt={prod.nombre}/>                      
+                      <img 
+                        src={p.imagen_url.startsWith('http') ? p.imagen_url : `/ImagenesProductos/${p.imagen_url}`} 
+                        alt={p.nombre} 
+                        className={styles['producto-imagen-tabla']} />
                         ) : (
                         <span>No image</span>
                       )}

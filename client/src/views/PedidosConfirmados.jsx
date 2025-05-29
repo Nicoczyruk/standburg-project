@@ -1,115 +1,195 @@
-import React, { useState, useEffect } from 'react';
+// client/src/views/PedidosConfirmados.jsx
+import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
+import styles from './PedidosConfirmados.module.css'; // Correcta importación de CSS Module
 
-// import './pedidosConfirmados.css'; // Descomenta si tienes estilos
+const ESTADO_EN_PREPARACION = 'en preparacion';
+const ESTADO_ENTREGADO = 'entregado';
 
-// Estados a mostrar en esta vista (PENDIENTE, en preparacion, listo)
-const ESTADOS_VISIBLES = ['PENDIENTE', 'en preparacion', 'listo'];
+// ESTADOS_COLORES_CLASES ahora directamente usa los nombres de tu CSS para los badges de estado
+const ESTADOS_COLORES_CLASES = {
+  'pendiente': styles['estado-PENDIENTE'],
+  'en preparacion': styles['estado-en-preparacion'],
+  'listo': styles['estado-listo'],
+  'entregado': styles['estado-entregado'],
+  'pagado': styles['estado-pagado'],
+  'cancelado': styles['estado-cancelado'],
+  'a confirmar': styles['estado-A-CONFIRMAR'],
+  'default': styles['estado-desconocido']
+};
 
 const PedidosConfirmados = () => {
   const [pedidos, setPedidos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [updatingId, setUpdatingId] = useState(null);
+  const [filtroActual, setFiltroActual] = useState(ESTADO_EN_PREPARACION);
 
-  // Función para cargar los pedidos desde la API
-  const fetchPedidos = async () => {
+  const fetchPedidosYDetalles = useCallback(async () => {
     setLoading(true);
     setError(null);
+    setPedidos([]);
     try {
-      const response = await fetch('/api/pedidos');
+      const apiUrl = `/api/pedidos-gestion?estado=${encodeURIComponent(filtroActual)}`;
+      const response = await fetch(apiUrl);
       if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(`Error ${response.status}: ${errData.message || response.statusText}`);
+        const errorData = await response.json().catch(() => ({ message: response.statusText }));
+        throw new Error(`Error ${response.status}: ${errorData.message || 'No se pudo obtener los pedidos'}`);
       }
       const data = await response.json();
-      // Filtramos en el cliente por los estados definidos
-      const pedidosFiltrados = (data || []).filter(p => ESTADOS_VISIBLES.includes(p.estado));
-      setPedidos(pedidosFiltrados);
+      const groupedPedidos = data.reduce((acc, item) => {
+        const pedidoId = item.pedido_id;
+        if (!acc[pedidoId]) {
+          acc[pedidoId] = {
+            pedido_id: pedidoId,
+            id_mesa: item.mesa_id,
+            numero_mesa: item.numero_mesa,
+            fecha: item.fecha,
+            estado: item.estado_pedido,
+            cliente_nombre: item.cliente_nombre,
+            productos: [],
+            total_pedido: parseFloat(item.total_pedido) || 0,
+          };
+        }
+        acc[pedidoId].productos.push({
+          producto_id: item.id_producto,
+          nombre_producto: item.nombre_producto,
+          cantidad: item.cantidad,
+          precio_unitario: parseFloat(item.precio_unitario) || 0,
+          subtotal: parseFloat(item.subtotal) || 0,
+        });
+        return acc;
+      }, {});
+      setPedidos(Object.values(groupedPedidos));
     } catch (err) {
-      console.error("Error al obtener pedidos:", err);
+      console.error(`Error al obtener o procesar pedidos para gestión (${filtroActual}):`, err);
       setError(err.message);
+      toast.error(`Error al cargar pedidos: ${err.message}`);
     } finally {
       setLoading(false);
     }
-  };
+  }, [filtroActual]);
 
-  // Cargar pedidos al montar
   useEffect(() => {
-    fetchPedidos();
-  }, []);
+    fetchPedidosYDetalles();
+  }, [fetchPedidosYDetalles]);
 
-  // Función para marcar un pedido como entregado (PUT /api/pedidos/:id/estado)
-  const marcarEntregado = async (pedidoId) => {
+  const cambiarEstadoPedido = async (pedidoId, nuevoEstado) => {
     setUpdatingId(pedidoId);
-    setError(null);
     try {
       const response = await fetch(`/api/pedidos/${pedidoId}/estado`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ estado: 'entregado' }) // Siempre envía 'entregado'
+        body: JSON.stringify({ estado: nuevoEstado }),
       });
-
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(`Error ${response.status}: ${errorData.message || 'No se pudo actualizar el estado'}`);
+        const errorData = await response.json().catch(() => ({ message: `Error al cambiar estado a ${nuevoEstado}` }));
+        throw new Error(errorData.message || `No se pudo actualizar el estado del pedido ${pedidoId}`);
       }
-            
-      toast.success('¡Pedido entregado!');
-      
-      // Éxito: Recargar la lista para quitar el pedido entregado
-      await fetchPedidos();
-
+      toast.success(`Pedido #${pedidoId} actualizado a ${nuevoEstado}`);
+      fetchPedidosYDetalles();
     } catch (err) {
-      console.error(`Error al marcar como entregado el pedido ${pedidoId}:`, err);
-      setError(`Error al actualizar pedido #${pedidoId}: ${err.message}`);
+      console.error("Error al cambiar estado del pedido:", err);
+      toast.error(`Error al actualizar pedido #${pedidoId}: ${err.message}`);
     } finally {
       setUpdatingId(null);
     }
   };
 
-  // --- Renderizado ---
+  const handleFiltroChange = (nuevoFiltro) => {
+    setFiltroActual(nuevoFiltro);
+  };
 
-  if (loading) {
-    return <div className="pedidos-confirmados"><h1>Pedidos Pendientes/Listos</h1><p>Cargando pedidos...</p></div>;
-  }
-
-  // Muestra error si la carga inicial falló y no hay datos
-  if (error && !pedidos.length) {
-    return <div className="pedidos-confirmados"><h1>Pedidos Pendientes/Listos</h1><p style={{ color: 'red' }}>{error}</p></div>;
-  }
+  // Se usan las clases del CSS module para mensajes
+  if (loading) return <div className={styles['loading-message']}>Cargando pedidos...</div>;
+  if (error && pedidos.length === 0) return <div className={styles['error-message']}>Error al cargar pedidos: {error}</div>;
 
   return (
-    <div className="pedidos-confirmados">
-      <h1>Pedidos Pendientes/Listos</h1>
-      {/* Muestra errores de actualización si ocurren */}
-      {error && <p style={{ color: 'orange', fontWeight: 'bold' }}>{error}</p>}
+    // Contenedor principal
+    <div className={styles['pedidos-confirmados-container']}>
+      {/* Título - El CSS lo estiliza por etiqueta h1 dentro del contenedor */}
+      <h1>Gestión de Pedidos</h1>
+      
+      {/* Contenedor de filtros - Clase corregida */}
+      <div className={styles['filtros-pedidos']}>
+        <button 
+            onClick={() => handleFiltroChange(ESTADO_EN_PREPARACION)} 
+            // Clases corregidas para botón de filtro y estado activo
+            className={`${styles['boton-filtro']} ${filtroActual === ESTADO_EN_PREPARACION ? styles.activo : ''}`}
+        >
+            En Preparación
+        </button>
+        <button 
+            onClick={() => handleFiltroChange(ESTADO_ENTREGADO)} 
+            className={`${styles['boton-filtro']} ${filtroActual === ESTADO_ENTREGADO ? styles.activo : ''}`}
+        >
+            Entregados
+        </button>
+      </div>
 
-      {pedidos.length === 0 ? (
-        <p>No hay pedidos pendientes, en preparación o listos.</p>
-      ) : (
-        pedidos.map(p => (
-          <div key={p.pedido_id} style={{ border: '1px solid #ccc', padding: 12, marginBottom: 12, backgroundColor: updatingId === p.pedido_id ? '#f0f0f0' : 'white' }}>
-            <h2>Pedido #{p.pedido_id}</h2>
-            <p><strong>Cliente:</strong> {p.cliente_nombre || 'Mostrador/Mesa'}</p>
-            <p><strong>Teléfono:</strong> {p.cliente_telefono || 'N/A'}</p>
-            <p><strong>Dirección:</strong> {p.cliente_direccion || 'N/A'}</p>
-            <p><strong>Tipo:</strong> {p.tipo || 'N/A'}</p>
-            <p><strong>Mesa:</strong> {p.numero_mesa || 'N/A'}</p>
-            <p><strong>Total:</strong> ${typeof p.total === 'number' ? p.total.toFixed(2) : 'N/A'}</p>
-            <p><strong>Estado Actual:</strong> <span style={{ fontWeight: 'bold' }}>{p.estado ? p.estado.toUpperCase() : 'N/A'}</span></p> {/* Manejo por si estado es null */}
+      {/* Lista de pedidos (grid) - Clase corregida */}
+      <div className={styles['lista-pedidos']}>
+        {pedidos.length === 0 && !loading && (
+          // Mensaje "no hay pedidos" - Clase corregida
+          <p className={styles['no-pedidos-mensaje']}>No hay pedidos en estado "{filtroActual}".</p>
+        )}
+        {pedidos.map(pedido => (
+          // Tarjeta de pedido - Clase base correcta
+          <div 
+            key={pedido.pedido_id} 
+            className={styles['pedido-card']} // Ya no se aplica el color de estado aquí
+          >
+            {/* Título de la tarjeta (h2 o h3) - Usamos h2 como en el CSS, o ajusta el CSS a h3 si prefieres */}
+            {/* El CSS tiene estilos para '.pedido-card h2' */}
+            <h2>Pedido #{pedido.pedido_id} - Mesa: {pedido.numero_mesa || pedido.id_mesa || 'N/A'}</h2>
+            
+            {/* Contenedor para información del pedido para aplicar estilos flex */}
+            <div className={styles['info-pedido']}>
+              {pedido.cliente_nombre && <p><strong>Cliente:</strong> {pedido.cliente_nombre}</p>}
+              <p><strong>Fecha:</strong> {new Date(pedido.fecha).toLocaleString()}</p>
+              <p>
+                <strong>Estado:</strong>
+                {/* El span recibe la clase base 'estado-pedido' y la clase de color específica */}
+                <span className={`${styles['estado-pedido']} ${ESTADOS_COLORES_CLASES[pedido.estado?.toLowerCase()] || ESTADOS_COLORES_CLASES.default}`}>
+                    {pedido.estado?.toUpperCase()}
+                </span>
+              </p>
+            </div>
+            
+            {/* Título de productos - Clase correcta */}
+            <h4 className={styles['titulo-productos']}>Productos:</h4>
+            {/* Lista de productos UL - Clase correcta */}
+            <ul className={styles['lista-productos-pedido']}>
+              {pedido.productos && pedido.productos.length > 0 ? (
+                pedido.productos.map((producto, index) => (
+                  // El CSS estiliza 'li' directamente dentro de '.lista-productos-pedido li'
+                  <li key={`${pedido.pedido_id}-${producto.producto_id}-${index}`}>
+                    {producto.nombre_producto || 'Producto desconocido'} - Cant: {producto.cantidad} - Precio: ${producto.precio_unitario?.toFixed(2)}
+                  </li>
+                ))
+              ) : (
+                <li>No hay detalles de productos para este pedido.</li>
+              )}
+            </ul>
+            {/* Total del Pedido - Estilizado por 'p' general dentro de 'pedido-card' o 'info-pedido' */}
+            <p><strong>Total del Pedido:</strong> ${pedido.total_pedido?.toFixed(2)}</p>
 
-            {/* Botón ÚNICO para marcar como entregado */}
-            <button
-              onClick={() => marcarEntregado(p.pedido_id)}
-              disabled={updatingId === p.pedido_id} // Deshabilitar si se está actualizando este pedido
-              style={{ marginTop: '10px' }}
-            >
-              {updatingId === p.pedido_id ? 'Marcando...' : 'Marcar como Entregado'}
-            </button>            
+            {/* Acciones del pedido - Clase correcta */}
+            <div className={styles['acciones-pedido']}>
+              {pedido.estado && pedido.estado.toLowerCase() === ESTADO_EN_PREPARACION && (
+                <button
+                  onClick={() => cambiarEstadoPedido(pedido.pedido_id, ESTADO_ENTREGADO)}
+                  // Clases correctas para botón de acción y tipo de botón
+                  className={`${styles['boton-accion-card']} ${styles['boton-entregado']}`}
+                  disabled={updatingId === pedido.pedido_id}
+                >
+                  {updatingId === pedido.pedido_id ? 'Actualizando...' : 'Marcar como Entregado'}
+                </button>
+              )}
+            </div>
           </div>
-        ))
-      )}
+        ))}
+      </div>
     </div>
   );
 };
