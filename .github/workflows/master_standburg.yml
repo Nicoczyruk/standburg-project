@@ -1,7 +1,5 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
-name: Build and deploy Node.js app to Azure Web App - standburg
+# .github/workflows/master_standburg.yml
+name: Build and deploy Node.js app to Azure Web App - standburg (pre-built client)
 
 on:
   push:
@@ -10,53 +8,29 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-and-deploy: 
     runs-on: ubuntu-latest
-    permissions:
-      contents: read #This is required for actions/checkout
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Node.js version
-        uses: actions/setup-node@v3
-        with:
-          node-version: '22.x'
-
-      - name: npm install, build, and test
-        run: |
-          npm install
-          npm run build --if-present
-          npm run test --if-present
-
-      - name: Zip artifact for deployment
-        run: zip release.zip ./* -r
-
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v4
-        with:
-          name: node-app
-          path: release.zip
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
     environment:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
+      id-token: write 
+      contents: read 
 
     steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v4
-        with:
-          name: node-app
+      - name: Checkout code
+        uses: actions/checkout@v4 
 
-      - name: Unzip artifact for deployment
-        run: unzip release.zip
-      
+      - name: Set up Node.js version
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22.x' 
+
+      - name: Install backend (server) dependencies
+        working-directory: ./server
+        run: |
+          npm install --omit=dev # Instala solo dependencias de producción de server/package.json
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -68,7 +42,7 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'standburg'
-          slot-name: 'Production'
-          package: .
-          
+          app-name: 'standburg' # Nombre de tu Azure Web App
+          slot-name: 'Production' # O el slot de despliegue que uses
+          package: . # Despliega todo el contenido del repositorio checkout
+                     # Azure App Service usará el "Comando de Inicio" para arrancar la app
