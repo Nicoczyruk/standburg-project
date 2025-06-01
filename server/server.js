@@ -6,6 +6,7 @@ const path = require('path');
 const db = require('./db/connection'); // Importa el módulo de conexión
 
 // IMPORTAR RUTAS
+const authRoutes = require('./routes/auth.routes.js'); //
 const categoriaRoutes = require('./routes/categoria.routes');
 const productoRoutes = require('./routes/producto.routes');
 const mesaRoutes = require('./routes/mesa.routes');
@@ -16,6 +17,7 @@ const gastoRoutes = require('./routes/gasto.routes');
 const arqueoRoutes = require('./routes/arqueo.routes');
 const movimientoCajaRoutes = require('./routes/movimientoCaja.routes');
 const pedidoGestionRoutes = require('./routes/pedidoGestion.routes.js');
+
 
 
 
@@ -40,6 +42,7 @@ app.get('/', (req, res) => {
 });
 
 // ---  ROUTES ---
+app.use('/api/auth', authRoutes); //
 app.use('/api/categorias', categoriaRoutes);
 app.use('/api/productos', productoRoutes);
 app.use('/api/mesas', mesaRoutes);
