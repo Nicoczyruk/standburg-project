@@ -274,3 +274,148 @@
   text-align: center;
   margin-bottom: 35px; 
 }
+
+/* Botones de Acción en la Tabla (Modificar/Eliminar) */
+.btnAction { /* Clase genérica para botones de acción en la tabla si la necesitas */
+  padding: 6px 12px;
+  margin-right: 8px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: background-color 0.2s ease;
+}
+
+.btnModificar {
+  background-color: #ffc107; /* Amarillo */
+  color: #212529; /* Texto oscuro para contraste */
+}
+.btnModificar:hover {
+  background-color: #e0a800;
+}
+
+.btnEliminar {
+  background-color: #dc3545; /* Rojo */
+  color: white;
+}
+.btnEliminar:hover {
+  background-color: #c82333;
+}
+
+
+/* Estilos para el Modal */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.65); /* Un poco más oscuro */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050; /* Bootstrap usa 1040 para modal-backdrop, 1050 para modal */
+}
+
+.modalContent {
+  background-color: #fff;
+  padding: 20px 25px;
+  border-radius: 0.3rem; /* Bootstrap-like border-radius */
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  width: 90%;
+  max-width: 500px;
+  z-index: 1051;
+  max-height: 90vh; /* Para evitar que el modal sea demasiado alto */
+  overflow-y: auto; /* Permitir scroll si el contenido es largo */
+}
+
+.modalContent h2 {
+  margin-top: 0;
+  margin-bottom: 1.5rem; /* Más espacio */
+  color: #343a40; /* Color de título más oscuro */
+  font-size: 1.75rem;
+  border-bottom: 1px solid #dee2e6; /* Separador de título */
+  padding-bottom: 0.75rem;
+}
+
+.modalContent div:not(.modalActions) { /* Aplicar solo a los divs de campos */
+  margin-bottom: 1rem;
+}
+
+.modalContent label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600; /* Un poco más de peso */
+  color: #495057;
+}
+
+.modalContent input[type="text"],
+.modalContent input[type="number"],
+.modalContent textarea,
+.modalContent select {
+  width: 100%;
+  padding: 0.5rem 0.75rem; /* Ajuste de padding */
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+  box-sizing: border-box;
+  font-size: 1rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.modalContent input[type="text"]:focus,
+.modalContent input[type="number"]:focus,
+.modalContent textarea:focus,
+.modalContent select:focus {
+  border-color: #80bdff;
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.modalContent textarea {
+  min-height: 100px; /* Altura mínima para textarea */
+  resize: vertical;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem; /* Espacio entre botones del modal */
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #dee2e6; /* Separador para acciones */
+}
+
+.modalActions button {
+  padding: 0.5rem 1rem; /* Padding para botones de modal */
+  border-radius: 0.25rem;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+}
+
+.modalActions button[type="submit"] {
+  background-color: #28a745; /* Verde de éxito */
+  color: white;
+  border: 1px solid #28a745;
+}
+.modalActions button[type="submit"]:hover {
+  background-color: #218838;
+  border-color: #1e7e34;
+}
+.modalActions button[type="submit"]:disabled {
+  background-color: #a5d6a7; /* Verde más claro para deshabilitado */
+  border-color: #a5d6a7;
+  cursor: not-allowed;
+}
+
+
+.modalActions .btnCancelar { /* Estilo específico para el botón cancelar del modal */
+  background-color: #6c757d; /* Gris secundario */
+  color: white;
+  border: 1px solid #6c757d;
+}
+.modalActions .btnCancelar:hover {
+  background-color: #5a6268;
+  border-color: #545b62;
+}

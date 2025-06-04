@@ -60,81 +60,84 @@ const obtenerProductosPorCategoria = async (req, res, next) => {
 };
 
 
-// Crear un nuevo producto
 const crearProducto = async (req, res, next) => {
-    const { nombre, descripcion, precio, categoria_id } = req.body;
+    // 'costo' eliminado. 'disponible' no se gestiona aquí según tu última directiva.
+    const { nombre, descripcion, precio, categoria_id, imagen_url } = req.body; //
 
-    if (!nombre || typeof nombre !== 'string' || nombre.trim() === '') {
-        return res.status(400).json({ message: 'El campo "nombre" es obligatorio.' });
+    if (!nombre || typeof nombre !== 'string' || nombre.trim() === '') { //
+        return res.status(400).json({ message: 'El campo "nombre" es obligatorio.' }); //
     }
-    if (precio === undefined || typeof parseFloat(precio) !== 'number' || parseFloat(precio) < 0) {
-         return res.status(400).json({ message: 'El campo "precio" es obligatorio y debe ser un número no negativo.' });
+    if (precio === undefined || isNaN(parseFloat(precio)) || parseFloat(precio) < 0) { //
+        return res.status(400).json({ message: 'El campo "precio" es obligatorio y debe ser un número no negativo.' }); //
     }
-    if (!categoria_id || !Number.isInteger(parseInt(categoria_id)) || parseInt(categoria_id) <= 0) {
-         return res.status(400).json({ message: 'El campo "categoria_id" es obligatorio y debe ser un ID válido.' });
+    if (!categoria_id || isNaN(parseInt(categoria_id)) || parseInt(categoria_id) <= 0) { //
+        return res.status(400).json({ message: 'El campo "categoria_id" es obligatorio y debe ser un ID válido.' }); //
     }
 
     const productoData = {
         nombre: nombre.trim(),
-        descripcion: descripcion ? descripcion.trim() : null,
+        descripcion: descripcion ? descripcion.trim() : null, //
         precio: parseFloat(precio),
-        categoria_id: parseInt(categoria_id)
+        categoria_id: parseInt(categoria_id),
+        imagen_url: imagen_url ? imagen_url.trim() : null,
+        // 'disponible' no se envía desde el frontend aquí; la BD debe tener un default o el backend manejarlo.
     };
 
     try {
-        const nuevoProducto = await productoQueries.createProducto(productoData);
-         if (!nuevoProducto) {
-             // Podría ocurrir si la categoría no existe y la FK falla, aunque lo manejamos en la query
-             return res.status(400).json({ message: 'No se pudo crear el producto, verifique los datos.' });
-         }
-        res.status(201).json(nuevoProducto);
-    } catch (error) {
-         // Si el error viene de la query por FK constraint (categoría inexistente)
-        if (error.message.includes('categoría con ID') && error.message.includes('no existe')) {
-             return res.status(400).json({ message: error.message }); // 400 Bad Request
+        const nuevoProducto = await productoQueries.createProducto(productoData); //
+        if (!nuevoProducto) { //
+            return res.status(400).json({ message: 'No se pudo crear el producto, verifique los datos (ej. categoría ID podría no existir).' });
         }
-        next(error);
+        res.status(201).json(nuevoProducto); //
+    } catch (error) {
+        if (error.message.includes('categoría con ID') && error.message.includes('no existe')) { //
+            return res.status(400).json({ message: error.message }); //
+        }
+        console.error('Error en crearProducto controller:', error);
+        next(error); //
     }
 };
 
-// Actualizar un producto existente
 const actualizarProducto = async (req, res, next) => {
-    const { id } = req.params;
-    const { nombre, descripcion, precio, categoria_id } = req.body;
-    const productoIdInt = parseInt(id);
+    const { id } = req.params; //
+    // 'costo' eliminado. 'disponible' no se gestiona aquí.
+    const { nombre, descripcion, precio, categoria_id, imagen_url } = req.body; //
+    const productoIdInt = parseInt(id); //
 
-    if (!Number.isInteger(productoIdInt) || productoIdInt <= 0) {
-        return res.status(400).json({ message: 'ID de producto inválido.' });
+    if (!Number.isInteger(productoIdInt) || productoIdInt <= 0) { //
+        return res.status(400).json({ message: 'ID de producto inválido.' }); //
     }
-    if (!nombre || typeof nombre !== 'string' || nombre.trim() === '') {
-        return res.status(400).json({ message: 'El campo "nombre" es obligatorio.' });
+    if (!nombre || typeof nombre !== 'string' || nombre.trim() === '') { //
+        return res.status(400).json({ message: 'El campo "nombre" es obligatorio.' }); //
     }
-     if (precio === undefined || typeof parseFloat(precio) !== 'number' || parseFloat(precio) < 0) {
-         return res.status(400).json({ message: 'El campo "precio" es obligatorio y debe ser un número no negativo.' });
+    if (precio === undefined || isNaN(parseFloat(precio)) || parseFloat(precio) < 0) { //
+        return res.status(400).json({ message: 'El campo "precio" es obligatorio y debe ser un número no negativo.' }); //
     }
-    if (!categoria_id || !Number.isInteger(parseInt(categoria_id)) || parseInt(categoria_id) <= 0) {
-         return res.status(400).json({ message: 'El campo "categoria_id" es obligatorio y debe ser un ID válido.' });
+    if (!categoria_id || isNaN(parseInt(categoria_id)) || parseInt(categoria_id) <= 0) { //
+        return res.status(400).json({ message: 'El campo "categoria_id" es obligatorio y debe ser un ID válido.' }); //
     }
 
-     const productoData = {
+    const productoData = {
         nombre: nombre.trim(),
-        descripcion: descripcion ? descripcion.trim() : null,
+        descripcion: descripcion ? descripcion.trim() : null, //
         precio: parseFloat(precio),
-        categoria_id: parseInt(categoria_id)
+        categoria_id: parseInt(categoria_id),
+        imagen_url: imagen_url ? imagen_url.trim() : null,
+        // 'disponible' no se actualiza desde aquí.
     };
 
     try {
-        const productoActualizado = await productoQueries.updateProducto(productoIdInt, productoData);
-        if (!productoActualizado) {
-            return res.status(404).json({ message: `Producto con ID ${id} no encontrado.` });
+        const productoActualizado = await productoQueries.updateProducto(productoIdInt, productoData); //
+        if (!productoActualizado) { //
+            return res.status(404).json({ message: `Producto con ID ${id} no encontrado o datos inválidos.` }); //
         }
-        res.json(productoActualizado);
+        res.json(productoActualizado); //
     } catch (error) {
-        // Si el error viene de la query por FK constraint (categoría inexistente)
-        if (error.message.includes('categoría con ID') && error.message.includes('no existe')) {
-             return res.status(400).json({ message: error.message }); // 400 Bad Request
+        if (error.message.includes('categoría con ID') && error.message.includes('no existe')) { //
+            return res.status(400).json({ message: error.message }); //
         }
-        next(error);
+        console.error('Error en actualizarProducto controller:', error);
+        next(error); //
     }
 };
 
