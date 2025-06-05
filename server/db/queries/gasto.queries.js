@@ -2,7 +2,7 @@
 const db = require('../connection');
 const sql = require('mssql');
 
-const TIPOS_GASTO_VALIDOS = ['fijo', 'variable']; // Para validación
+const TIPOS_GASTO_VALIDOS = ['fijo', 'variable', 'cuenta corriente']; // Para validación
 
 /**
  * Obtiene todos los gastos, opcionalmente filtrados.

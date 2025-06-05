@@ -71,10 +71,9 @@ const Gastos = () => {
   };
 
   const eliminarGasto = async (id) => {
-    // Confirmación antes de eliminar
-    // if (!window.confirm("¿Estás seguro de que quieres eliminar este gasto?")) {
-    //   return;
-    // }
+     if (!window.confirm("¿Estás seguro de que quieres eliminar este gasto?")) {
+      return;
+     }
     try {
       const response = await fetch(`/api/gastos/${id}`, { method: 'DELETE' });
       if (!response.ok) {
@@ -141,6 +140,7 @@ const Gastos = () => {
         <select name="tipo_gasto" value={nuevoGasto.tipo_gasto} onChange={handleInputChange}>
           <option value="fijo">Fijo</option>
           <option value="variable">Variable</option>
+          <option value="cuenta corriente">Cuenta corriente</option>
         </select>
         <input name="concepto" value={nuevoGasto.concepto} onChange={handleInputChange} placeholder="Concepto" required />
         <input name="monto" type="number" value={nuevoGasto.monto} onChange={handleInputChange} placeholder="Monto" required step="0.01" />
@@ -160,6 +160,7 @@ const Gastos = () => {
           <option value="todos">Todos los Tipos</option>
           <option value="fijo">Fijo</option>
           <option value="variable">Variable</option>
+          <option value="cuenta corriente">Cuenta corriente</option>
         </select>
         <input type="date" onChange={(e) => setFiltroFecha(e.target.value)} value={filtroFecha} />
       </div>
@@ -177,6 +178,7 @@ const Gastos = () => {
                     <select name="tipo_gasto" value={gastoEditado.tipo_gasto} onChange={handleEditChange}>
                       <option value="fijo">Fijo</option>
                       <option value="variable">Variable</option>
+                      <option value="cuenta corriente">Cuenta corriente</option>
                     </select>
                     <input name="concepto" value={gastoEditado.concepto} onChange={handleEditChange} placeholder="Concepto"/>
                     <input name="monto" type="number" value={gastoEditado.monto} onChange={handleEditChange} step="0.01" placeholder="Monto"/>
