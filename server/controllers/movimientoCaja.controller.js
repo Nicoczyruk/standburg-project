@@ -26,7 +26,7 @@ const crear = async (req, res, next) => {
     }
 
     try {
-        // Opcional: Obtener el arqueo_id activo para asociarlo
+        
         const arqueoActivo = await arqueoQueries.getArqueoActivo();
         const arqueo_id_actual = arqueoActivo ? arqueoActivo.arqueo_id : null;
 
@@ -94,9 +94,94 @@ const obtenerPorId = async (req, res, next) => {
     }
 };
 
+const actualizar = async (req, res, next) => {
+    const { id } = req.params;
+    const movimientoIdInt = parseInt(id);
+    if (isNaN(movimientoIdInt) || movimientoIdInt <= 0) {
+        return res.status(400).json({ message: 'ID de movimiento inválido.' });
+    }
+
+    const { tipo_movimiento, descripcion, monto, fecha, metodo_pago_afectado } = req.body;
+
+    if (!tipo_movimiento || !movimientoQueries.TIPOS_MOVIMIENTO_VALIDOS.includes(tipo_movimiento)) {
+        return res.status(400).json({ message: `El campo "tipo_movimiento" es obligatorio y debe ser: ${movimientoQueries.TIPOS_MOVIMIENTO_VALIDOS.join(', ')}.` });
+    }
+    if (!descripcion || typeof descripcion !== 'string' || descripcion.trim() === '') {
+        return res.status(400).json({ message: 'El campo "descripcion" es obligatorio.' });
+    }
+    if (monto === undefined || typeof parseFloat(monto) !== 'number' || parseFloat(monto) <= 0) {
+        return res.status(400).json({ message: 'El campo "monto" es obligatorio y debe ser un número positivo.' });
+    }
+    
+    let fecha_hora_movimiento_iso;
+    if (fecha) {
+        const parsedDate = new Date(fecha);
+        if (isNaN(parsedDate.getTime())) {
+            return res.status(400).json({ message: 'La fecha proporcionada no es válida para la actualización.' });
+        }
+        // Mantener la hora original si es posible, o ajustar si solo se cambia la fecha
+        const movimientoExistente = await movimientoQueries.getMovimientoCajaById(movimientoIdInt);
+        if (!movimientoExistente) {
+            return res.status(404).json({ message: `Movimiento con ID ${id} no encontrado para actualizar.` });
+        }
+        const fechaOriginal = new Date(movimientoExistente.fecha_hora_movimiento);
+        parsedDate.setHours(fechaOriginal.getHours(), fechaOriginal.getMinutes(), fechaOriginal.getSeconds(), fechaOriginal.getMilliseconds());
+        fecha_hora_movimiento_iso = parsedDate.toISOString();
+
+    } else {
+        // Si no se provee fecha, se mantiene la existente. Esto requiere buscarla primero.
+        const movimientoExistente = await movimientoQueries.getMovimientoCajaById(movimientoIdInt);
+        if (!movimientoExistente) {
+            return res.status(404).json({ message: `Movimiento con ID ${id} no encontrado para actualizar.` });
+        }
+        fecha_hora_movimiento_iso = movimientoExistente.fecha_hora_movimiento;
+    }
+
+
+    const movimientoData = {
+        tipo_movimiento,
+        descripcion: descripcion.trim(),
+        monto: parseFloat(monto),
+        fecha_hora_movimiento: fecha_hora_movimiento_iso,
+        metodo_pago_afectado: metodo_pago_afectado || null
+    };
+
+    try {
+        const movimientoActualizado = await movimientoQueries.updateMovimientoCaja(movimientoIdInt, movimientoData);
+        if (!movimientoActualizado) {
+            return res.status(404).json({ message: `Movimiento con ID ${id} no encontrado.` });
+        }
+        res.json(movimientoActualizado);
+    } catch (error) {
+        next(error);
+    }
+};
+
+const eliminar = async (req, res, next) => {
+    const { id } = req.params;
+    const movimientoIdInt = parseInt(id);
+
+    if (isNaN(movimientoIdInt) || movimientoIdInt <= 0) {
+        return res.status(400).json({ message: 'ID de movimiento inválido.' });
+    }
+
+    try {
+        const movimientoEliminado = await movimientoQueries.deleteMovimientoCaja(movimientoIdInt);
+        if (!movimientoEliminado) {
+            return res.status(404).json({ message: `Movimiento con ID ${id} no encontrado.` });
+        }
+        // res.status(204).send(); // 204 No Content es común para DELETE exitoso
+        res.json({ message: 'Movimiento eliminado exitosamente.', movimiento: movimientoEliminado });
+    } catch (error) {
+        next(error);
+    }
+};
+
 
 module.exports = {
     crear,
     obtenerTodos,
-    obtenerPorId
+    obtenerPorId,
+    actualizar, 
+    eliminar
 };

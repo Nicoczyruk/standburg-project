@@ -131,21 +131,14 @@ const createProducto = async (productoData) => { //
  * @param {object} productoData - Datos del producto { nombre, descripcion, precio, categoria_id }.
  */
 const updateProducto = async (id, productoData) => { //
-    // 'disponible' ya no se espera aquí si el controller no lo pasa,
-    // porque el frontend no lo envía para la edición.
-    // 'costo' fue eliminado previamente.
     const { nombre, descripcion, precio, categoria_id, imagen_url } = productoData;
 
-    // Validación ajustada: Ya no se valida 'disponible' aquí.
+    
     if (!nombre || precio === undefined || categoria_id === undefined) {
-        // Este es el mensaje de error que debería aparecer si esta validación falla.
-        // Nota que no incluye "disponibilidad".
         throw new Error('Nombre, precio y categoría son requeridos para actualizar un producto.');
     }
 
     try {
-        // La sentencia SQL UPDATE ya no debe intentar actualizar 'disponible'
-        // ni 'fecha_actualizacion', ni 'costo'.
         const result = await db.query(
             `UPDATE PRODUCTOS
              SET nombre = @nombre, descripcion = @descripcion, precio = @precio,
@@ -159,7 +152,7 @@ const updateProducto = async (id, productoData) => { //
                 precio: { type: sql.Decimal(10, 2), value: precio },
                 categoria_id: { type: sql.Int, value: categoria_id },
                 imagen_url: { type: sql.NVarChar, value: imagen_url }
-                // No se incluye 'disponible' en los parámetros si no se va a actualizar.
+                
             }
         );
 

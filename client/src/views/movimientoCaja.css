@@ -58,4 +58,89 @@
   .egreso {
     background-color: #fcd4d4;
   }
+
+  .modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  width: 90%;
+  max-width: 500px;
+}
+
+.modal-content h3 {
+  margin-top: 0;
+}
+
+.modal-content div {
+  margin-bottom: 10px;
+}
+
+.modal-content label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.modal-content input,
+.modal-content select {
+  width: calc(100% - 16px); /* Considerar padding y border */
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.modal-acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.modal-acciones button {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.modal-acciones button[type="submit"] {
+  background-color: #007bff;
+  color: white;
+}
+
+.modal-acciones button[type="button"] {
+  background-color: #f0f0f0;
+}
+
+.btn-accion {
+  padding: 5px 8px;
+  margin-right: 5px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
+.btn-modificar {
+  background-color: #ffc107; /* Amarillo */
+  color: #212529;
+}
+
+.btn-eliminar {
+  background-color: #dc3545; /* Rojo */
+  color: white;
+}
   

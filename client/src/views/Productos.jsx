@@ -11,7 +11,6 @@ const Productos = () => {
   const [nuevoProducto, setNuevoProducto] = useState({
     nombre: '',
     precio: '',
-    // costo: '', // Eliminado
     categoria_id: '',
     descripcion: '',
     imagen_url: '',
@@ -39,7 +38,7 @@ const Productos = () => {
       const res = await fetch('/api/productos');
       if (!res.ok) throw new Error('Error al cargar productos');
       const data = await res.json();
-      setProductos(data); // Asumimos que el backend ahora envía productos con imagen_url y sin costo
+      setProductos(data); 
     } catch (e) {
       setError(e.message);
       toast.error(`Error al cargar productos: ${e.message}`);
@@ -89,11 +88,11 @@ const Productos = () => {
     const productoParaEnviar = {
         nombre: nuevoProducto.nombre.trim(),
         precio: parseFloat(nuevoProducto.precio),
-        // costo: ..., // Eliminado
+        
         categoria_id: parseInt(nuevoProducto.categoria_id, 10),
         descripcion: nuevoProducto.descripcion.trim(),
         imagen_url: nuevoProducto.imagen_url.trim() || null,
-        // No se envía 'disponible' desde el frontend al crear. El backend/DB debe manejarlo.
+        
     };
 
     try {
@@ -111,7 +110,7 @@ const Productos = () => {
       }
       const productoAgregado = await res.json();
       toast.success(`Producto "${productoAgregado.nombre || nuevoProducto.nombre}" agregado con éxito!`);
-      fetchProductos(); // Recarga productos, que deberían venir con imagen_url y sin costo
+      fetchProductos(); 
       setNuevoProducto({ nombre: '', precio: '', /*costo: '',*/ categoria_id: '', descripcion: '', imagen_url: '' });
     } catch (err) {
       setSubmitErrorNuevoProducto(err.message);
@@ -122,14 +121,14 @@ const Productos = () => {
   };
 
   const handleAbrirModalModificar = (producto) => {
-    // producto viene de fetchProductos, debe tener imagen_url y no costo
+    
     setProductoAEditar({
         ...producto,
         precio: producto.precio != null ? String(producto.precio) : '',
         descripcion: producto.descripcion || '',
         imagen_url: producto.imagen_url || '',
-        // No se maneja 'costo'
-        // 'disponible' vendrá en el objeto producto si el backend lo envía.
+        
+        
     });
     setIsModalOpen(true);
     setSubmitErrorModal(null);
@@ -140,7 +139,7 @@ const Productos = () => {
     setProductoAEditar(null);
   };
 
-  // No se necesita manejo especial para 'disponible' aquí ya que se quitó el checkbox
+  
   const handleInputChangeModal = (e) => {
     const { name, value } = e.target;
     setProductoAEditar(prev => ({
@@ -165,14 +164,11 @@ const Productos = () => {
     const datosActualizar = {
         nombre: productoAEditar.nombre.trim(),
         precio: parseFloat(productoAEditar.precio),
-        // costo: ..., // Eliminado
+       
         categoria_id: parseInt(productoAEditar.categoria_id, 10),
         descripcion: productoAEditar.descripcion.trim(),
         imagen_url: productoAEditar.imagen_url ? productoAEditar.imagen_url.trim() : null,
-        // No se envía 'disponible' explícitamente desde este formulario del modal.
-        // Si el backend lo necesita para actualizar, deberá recibirlo.
-        // O, si no se envía, el backend no debería intentar actualizarlo o usar su valor actual.
-        // Si se quiere poder editar 'disponible', se necesitaría un input y lógica aquí.
+        
     };
 
     try {
@@ -229,7 +225,7 @@ const Productos = () => {
             <label htmlFor="precio-nuevo-producto">Precio:</label>
             <input type="number" id="precio-nuevo-producto" name="precio" value={nuevoProducto.precio} onChange={handleChangeNuevoProducto} required min="0" step="0.01" />
           </div>
-          {/* Campo Costo Eliminado */}
+          
           <div className={styles.formFieldGroup}>
             <label htmlFor="categoria_id-nuevo-producto">Categoría:</label>
             {loadingCategorias ? <p>Cargando categorías...</p> : (
@@ -270,7 +266,7 @@ const Productos = () => {
                 <th>Nombre</th>
                 <th>Precio</th>
                 <th>Categoría</th>
-                {/* Columna Disponible Eliminada <th>Disponible</th> */}
+                
                 <th>Acciones</th>
               </tr>
             </thead>
@@ -291,7 +287,7 @@ const Productos = () => {
                     <td>{p.nombre}</td>
                     <td>${typeof p.precio === 'number' ? p.precio.toFixed(2) : (p.precio || 'N/D')}</td>
                     <td>{p.categoria_nombre || 'N/A'}</td>
-                    {/* Celda Disponible Eliminada <td>{p.disponible ? 'Sí' : 'No'}</td> */}
+                    
                     <td>
                       <button
                         onClick={() => handleAbrirModalModificar(p)}
@@ -309,7 +305,7 @@ const Productos = () => {
                   </tr>
                 ))
               ) : (
-                // Ajustar colSpan si se eliminó la columna 'Disponible'
+                
                 <tr><td colSpan="5">No hay productos registrados.</td></tr>
               )}
             </tbody>
@@ -330,7 +326,6 @@ const Productos = () => {
                 <label htmlFor="modal-precio">Precio:</label>
                 <input type="number" id="modal-precio" name="precio" step="0.01" value={productoAEditar.precio} onChange={handleInputChangeModal} required />
               </div>
-              {/* Campo Costo Eliminado del Modal */}
               <div>
                 <label htmlFor="modal-categoria_id">Categoría:</label>
                 <select id="modal-categoria_id" name="categoria_id" value={productoAEditar.categoria_id} onChange={handleInputChangeModal} required>
@@ -348,12 +343,6 @@ const Productos = () => {
                 <label htmlFor="modal-imagen_url">URL de Imagen (opcional):</label>
                 <input type="text" id="modal-imagen_url" name="imagen_url" placeholder="https://ejemplo.com/imagen.jpg" value={productoAEditar.imagen_url} onChange={handleInputChangeModal} />
               </div>
-              {/* Checkbox Disponible Eliminado del Modal 
-              <div className={styles.formFieldGroup}>
-                <label htmlFor="modal-disponible">Disponible:</label>
-                <input type="checkbox" id="modal-disponible" name="disponible" checked={!!productoAEditar.disponible} onChange={handleInputChangeModal} />
-              </div>
-              */}
               <div className={styles.modalActions}>
                 <button type="submit" disabled={isSubmittingModal}>
                   {isSubmittingModal ? 'Guardando...' : 'Guardar Cambios'}

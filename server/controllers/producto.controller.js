@@ -61,7 +61,7 @@ const obtenerProductosPorCategoria = async (req, res, next) => {
 
 
 const crearProducto = async (req, res, next) => {
-    // 'costo' eliminado. 'disponible' no se gestiona aquí según tu última directiva.
+    
     const { nombre, descripcion, precio, categoria_id, imagen_url } = req.body; //
 
     if (!nombre || typeof nombre !== 'string' || nombre.trim() === '') { //
@@ -80,7 +80,7 @@ const crearProducto = async (req, res, next) => {
         precio: parseFloat(precio),
         categoria_id: parseInt(categoria_id),
         imagen_url: imagen_url ? imagen_url.trim() : null,
-        // 'disponible' no se envía desde el frontend aquí; la BD debe tener un default o el backend manejarlo.
+        
     };
 
     try {
@@ -100,7 +100,7 @@ const crearProducto = async (req, res, next) => {
 
 const actualizarProducto = async (req, res, next) => {
     const { id } = req.params; //
-    // 'costo' eliminado. 'disponible' no se gestiona aquí.
+    
     const { nombre, descripcion, precio, categoria_id, imagen_url } = req.body; //
     const productoIdInt = parseInt(id); //
 
@@ -123,7 +123,7 @@ const actualizarProducto = async (req, res, next) => {
         precio: parseFloat(precio),
         categoria_id: parseInt(categoria_id),
         imagen_url: imagen_url ? imagen_url.trim() : null,
-        // 'disponible' no se actualiza desde aquí.
+        
     };
 
     try {

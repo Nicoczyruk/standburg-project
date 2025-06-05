@@ -5,14 +5,14 @@ const productoController = require('../controllers/producto.controller');
 
 const router = express.Router();
 
-// --- Rutas Públicas (o que podrían serlo) ---
+// --- Rutas Públicas ---
 // GET /api/productos -> Obtener todos los productos (puede filtrar con ?categoria_id=X)
 router.get('/', productoController.obtenerTodosLosProductos);
 
 // GET /api/productos/:id -> Obtener un producto por ID
 router.get('/:id', productoController.obtenerProductoPorId);
 
-// --- Rutas Protegidas (requerirán autenticación/autorización de Admin) ---
+
 // POST /api/productos -> Crear un nuevo producto
 router.post('/', /* authMiddleware.isAdmin, */ productoController.crearProducto);
 

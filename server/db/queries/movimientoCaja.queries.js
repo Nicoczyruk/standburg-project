@@ -112,11 +112,64 @@ const getMovimientoCajaById = async (id) => {
     }
 };
 
-// Podrías añadir funciones de update y delete si el frontend las requiere.
+/**
+ * Actualiza un movimiento de caja existente.
+ * @param {number} id - ID del movimiento a actualizar.
+ * @param {object} movimientoData - Datos para actualizar (tipo_movimiento, descripcion, monto, fecha_hora_movimiento, metodo_pago_afectado).
+ */
+const updateMovimientoCaja = async (id, { tipo_movimiento, descripcion, monto, fecha_hora_movimiento, metodo_pago_afectado }) => {
+    try {
+        const result = await db.query(
+            `UPDATE MOVIMIENTOS_CAJA
+             SET tipo_movimiento = @tipo_movimiento, 
+                 descripcion = @descripcion, 
+                 monto = @monto, 
+                 fecha_hora_movimiento = @fecha_hora_movimiento,
+                 metodo_pago_afectado = @metodo_pago_afectado
+             OUTPUT INSERTED.*
+             WHERE movimiento_id = @id;`,
+            {
+                id: { type: sql.Int, value: id },
+                tipo_movimiento: { type: sql.NVarChar(50), value: tipo_movimiento },
+                descripcion: { type: sql.NVarChar(255), value: descripcion },
+                monto: { type: sql.Decimal(10, 2), value: monto },
+                fecha_hora_movimiento: { type: sql.DateTime2, value: fecha_hora_movimiento },
+                metodo_pago_afectado: { type: sql.NVarChar(100), value: metodo_pago_afectado }
+            }
+        );
+        return result.recordset[0];
+    } catch (error) {
+        console.error(`Error al actualizar movimiento de caja con ID ${id}:`, error);
+        throw error;
+    }
+};
+
+/**
+ * Elimina un movimiento de caja por su ID.
+ * @param {number} id - ID del movimiento a eliminar.
+ */
+const deleteMovimientoCaja = async (id) => {
+    try {
+        const result = await db.query(
+            `DELETE FROM MOVIMIENTOS_CAJA
+             OUTPUT DELETED.*
+             WHERE movimiento_id = @id;`,
+            {
+                id: { type: sql.Int, value: id }
+            }
+        );
+        return result.recordset[0]; // Retorna el objeto eliminado o undefined si no se encontró
+    } catch (error) {
+        console.error(`Error al eliminar movimiento de caja con ID ${id}:`, error);
+        throw error;
+    }
+};
 
 module.exports = {
     createMovimientoCaja,
     getAllMovimientosCaja,
     getMovimientoCajaById,
-    TIPOS_MOVIMIENTO_VALIDOS
+    TIPOS_MOVIMIENTO_VALIDOS,
+    updateMovimientoCaja, 
+    deleteMovimientoCaja
 };
