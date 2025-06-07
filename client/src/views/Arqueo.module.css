@@ -308,3 +308,116 @@
   color: #555; 
   font-size: 1.1rem;
 }
+
+/* Agrega este código a tu archivo Arqueo.module.css */
+
+/* Contenedor principal y mensajes */
+.contenedor {
+  padding: 20px;
+  max-width: 900px;
+  margin: auto;
+  font-family: sans-serif;
+}
+
+.errorMensaje {
+  color: #d93025;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+}
+
+.separador {
+  border: none;
+  border-top: 1px solid #e0e0e0;
+  margin: 40px 0;
+}
+
+
+/* Estilos para la sección de Arqueo Activo */
+.arqueoActivoContenedor {
+  background-color: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.arqueoActivoContenedor h2 {
+  margin-top: 0;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+.botonRefrescar {
+  background-color: #e0e0e0;
+  border: 1px solid #ccc;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  float: right;
+  font-size: 0.9em;
+}
+
+.botonRefrescar:hover {
+  background-color: #d4d4d4;
+}
+
+.botonRefrescar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Resumen de totales en tiempo real */
+.resumenActivo {
+  margin-top: 20px;
+  margin-bottom: 30px;
+  background-color: #fff;
+  padding: 15px;
+  border-radius: 5px;
+  border: 1px solid #e7e7e7;
+}
+
+.resumenActivo hr {
+  border: none;
+  border-top: 1px dashed #ccc;
+  margin: 10px 0;
+}
+
+.detalleLinea {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 1.1em;
+}
+
+.detalleLabel {
+  color: #555;
+}
+
+.detalleValor {
+  font-weight: bold;
+  color: #333;
+}
+
+/* Formulario de cierre */
+.botonCerrar {
+  background-color: #c9302c !important; /* Usar !important para sobreescribir si es necesario */
+  color: white !important;
+}
+
+.botonCerrar:hover {
+    background-color: #a92824 !important;
+}
+
+/* Re-definición de clases de valor para el historial (asegurando que existan) */
+.valor-positivo {
+  color: #28a745; /* Verde */
+  font-weight: bold;
+}
+
+.valor-negativo {
+  color: #dc3545; /* Rojo */
+  font-weight: bold;
+}

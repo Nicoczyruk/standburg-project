@@ -53,6 +53,7 @@ app.use('/api/gastos', gastoRoutes);
 app.use('/api/arqueos', arqueoRoutes);
 app.use('/api/movimientos-caja', movimientoCajaRoutes);
 app.use('/api/pedidos-gestion', pedidoGestionRoutes);
+app.use('/api/arqueo', arqueoRoutes);
 
 
 // --- Ruta Catch-All para Single Page Application (SPA) ---

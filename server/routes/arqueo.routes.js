@@ -1,29 +1,29 @@
 // server/routes/arqueo.routes.js
 const express = require('express');
-const arqueoController = require('../controllers/arqueo.controller');
-// const authMiddleware = require('../middleware/auth.middleware'); 
+const { 
+    abrirArqueo, 
+    obtenerDetallesArqueoActivo, 
+    cerrarArqueo, // Nombre corregido
+    obtenerHistorialArqueos, 
+    getArqueoDetalladoById 
+} = require('../controllers/arqueo.controller');
 
 const router = express.Router();
 
-// Abrir un nuevo arqueo
-// POST /api/arqueos/abrir
-router.post('/abrir', /* authMiddleware.isLoggedIn, */ arqueoController.abrirNuevoArqueo);
+// Ruta para obtener el arqueo activo con sus detalles calculados
+router.get('/activo', obtenerDetallesArqueoActivo);
 
-// Cerrar el arqueo activo
-// PUT /api/arqueos/cerrar (el ID se obtiene del arqueo activo)
-router.put('/cerrar', /* authMiddleware.isLoggedIn, */ arqueoController.cerrarArqueoActivo);
+// Ruta para iniciar un nuevo arqueo de caja
+router.post('/abrir', abrirArqueo);
 
-// Obtener el arqueo activo
-// GET /api/arqueos/activo
-router.get('/activo', /* authMiddleware.isLoggedIn, */ arqueoController.obtenerArqueoActivoActual);
+// CORRECCIÓN 2: La ruta ahora apunta a la función 'cerrarArqueo' que sí existe
+router.put('/cerrar', cerrarArqueo);
 
-// Obtener historial de arqueos cerrados
-// GET /api/arqueos
-router.get('/', /* authMiddleware.isLoggedIn, */ arqueoController.obtenerHistorial);
+// Ruta para obtener el historial de arqueos cerrados
+router.get('/historial', obtenerHistorialArqueos);
 
-// Obtener un arqueo específico por ID (para ver detalles de un arqueo pasado)
-// GET /api/arqueos/:id
-router.get('/:id', /* authMiddleware.isLoggedIn, */ arqueoController.obtenerArqueoPorIdDetallado);
+// Ruta para obtener un arqueo específico por su ID
+router.get('/:id', getArqueoDetalladoById);
 
 
 module.exports = router;

@@ -1,432 +1,259 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import styles from './Arqueo.module.css';
 
-const Arqueo = () => {
-  const [montoApertura, setMontoApertura] = useState('');
-  const [cajaAbierta, setCajaAbierta] = useState(false);
-  const [arqueoActivo, setArqueoActivo] = useState(null);
-  const [historial, setHistorial] = useState([]);
-  
-  const [montoCierreEfectivo, setMontoCierreEfectivo] = useState('');
-  const [montoCierreTarjeta, setMontoCierreTarjeta] = useState('');
-  const [montoCierreTransferencia, setMontoCierreTransferencia] = useState('');
-  const [notasCierre, setNotasCierre] = useState('');
-
-  const [denominaciones, setDenominaciones] = useState({
-    b2000:0, b1000:0, b500:0, b200:0, b100:0, b50:0, b20:0, b10:0,
-    m10:0, m5:0, m2:0, m1:0, m050:0, m025:0, m010:0 
-  });
-  const [totalContadoBilletes, setTotalContadoBilletes] = useState(0);
-
-
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const formatDateTime = (dateTimeString) => {
-    if (!dateTimeString) return 'N/A';
-    try {
-      const date = new Date(dateTimeString);
-      if (isNaN(date.getTime())) return 'Fecha inválida';
-      return `${date.toLocaleDateString('es-AR', {day: '2-digit', month: '2-digit', year: 'numeric'})} ${date.toLocaleTimeString('es-AR', {hour: '2-digit', minute: '2-digit', hour12: false})}`;
-    } catch (e) {
-      return 'Fecha inválida';
-    }
-  };
-
-  
-  const fetchArqueoActivo = async () => {
-    try {
-      const response = await fetch('/api/arqueos/activo'); 
-      const data = await response.json();
-      if (response.ok && data && data.arqueo_id) {
-        setArqueoActivo(data);
-        setCajaAbierta(true);
-        setMontoApertura(data.monto_inicial.toString()); 
-        if (data.fecha_hora_cierre) { 
-          setCajaAbierta(false); 
-        }
-      } else {
-        setArqueoActivo(null);
-        setCajaAbierta(false);
-      }
-    } catch (err) {
-      setError(`Error al cargar arqueo activo: ${err.message}`);
-      setCajaAbierta(false);
-    }
-  };
-
-  const fetchHistorial = async () => {
-    try {
-      const response = await fetch('/api/arqueos'); 
-      if (!response.ok) throw new Error('No se pudo cargar el historial.');
-      const data = await response.json();
-      setHistorial(data || []);
-    } catch (err) {
-      setError(`Error al cargar historial: ${err.message}`);
-    }
-  };
-
-  useEffect(() => {
-    const cargarDatosIniciales = async () => {
-      setLoading(true);
-      setError(null);
-      await fetchArqueoActivo();
-      await fetchHistorial();
-      setLoading(false);
-    };
-    cargarDatosIniciales();
-  }, []);
-
-  const handleAbrirCaja = async () => {
-    if (montoApertura.trim() === '' || isNaN(parseFloat(montoApertura)) || parseFloat(montoApertura) <=0) {
-      setError('Ingrese un monto inicial válido y mayor a cero.');
-      return;
-    }
-    setIsSubmitting(true);
-    setError(null);
-    try {
-      const response = await fetch('/api/arqueos/abrir', { 
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ monto_inicial: parseFloat(montoApertura) }),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || 'Error al abrir la caja.');
-      }
-      setArqueoActivo(data); 
-      setCajaAbierta(true);
-      setMontoApertura(''); 
-      
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-  
-  // Lógica para calcular el total del desglose de billetes y monedas
-   const calcularTotalBilletes = (currentDenominaciones) => {
-    let total = 0;
-    total += (currentDenominaciones.b2000 || 0) * 2000;
-    total += (currentDenominaciones.b1000 || 0) * 1000;
-    total += (currentDenominaciones.m010 || 0) * 0.10;
-    return total;
-  };
-
-  const handleDenominacionChange = (e) => {
-    const { name, value } = e.target;
-    const newDenominaciones = {
-      ...denominaciones,
-      [name]: parseInt(value, 10) || 0,
-    };
-    setDenominaciones(newDenominaciones);
-    const newTotal = calcularTotalBilletes(newDenominaciones); 
-    setTotalContadoBilletes(newTotal);
-    setMontoCierreEfectivo(newTotal.toString()); 
-  };
-
-
-  const handleCerrarCaja = async () => {
-    // Validación básica
-    if (isNaN(parseFloat(montoCierreEfectivo)) || isNaN(parseFloat(montoCierreTarjeta)) || isNaN(parseFloat(montoCierreTransferencia))) {
-      setError('Todos los montos de cierre deben ser números válidos.');
-      return;
-    }
-    setIsSubmitting(true);
-    setError(null);
-    try {
-      const payload = {
-        monto_cierre_efectivo_real: parseFloat(montoCierreEfectivo) || 0,
-        monto_cierre_tarjeta_real: parseFloat(montoCierreTarjeta) || 0,
-        monto_cierre_transferencia_real: parseFloat(montoCierreTransferencia) || 0,
-        notas_cierre: notasCierre.trim() || null,
-      };
-      const response = await fetch('/api/arqueos/cerrar', { 
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || 'Error al cerrar la caja.');
-      }
-      setArqueoActivo(data); // El backend devuelve el arqueo cerrado con cálculos
-      setCajaAbierta(false); // Importante: la caja ahora está cerrada para permitir una nueva apertura
-      
-      // Limpiar campos después de cerrar
-      setMontoCierreEfectivo('');
-      setMontoCierreTarjeta('');
-      setMontoCierreTransferencia('');
-      setNotasCierre('');
-      setDenominaciones({ b2000:0, b1000:0, b500:0, b200:0, b100:0, b50:0, b20:0, b10:0, m10:0, m5:0, m2:0, m1:0, m050:0, m025:0, m010:0 });
-      setTotalContadoBilletes(0);
-
-      await fetchHistorial(); 
-      // alert('Caja cerrada exitosamente.');
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const reiniciarParaNuevaCaja = () => {
-    setMontoApertura('');
-    setCajaAbierta(false);
-    setArqueoActivo(null); 
-    setMontoCierreEfectivo('');
-    setMontoCierreTarjeta('');
-    setMontoCierreTransferencia('');
-    setNotasCierre('');
-    setError(null);
-  };
-
-  // --- Fin de la Lógica ---
-
-  if (loading) {
-    return <div className={styles['arqueo-container']}><h1>Arqueo de Caja</h1><p className={styles['loading-message']}>Cargando...</p></div>;
-  }
-
-  // Determinar qué mostrar basado en el estado
-  let contenidoPrincipal;
-  if (!cajaAbierta && (!arqueoActivo || arqueoActivo.fecha_hora_cierre)) {
-    // Mostrar formulario de Apertura
-    contenidoPrincipal = (
-      <div className={styles['seccion-formulario']}>
-        <h2>Apertura de Caja</h2>
-        <div className={styles['input-group']}>
-          <label htmlFor="montoApertura">Monto inicial en caja:</label>
-          <input
-            id="montoApertura"
-            type="number"
-            placeholder="Monto inicial"
-            value={montoApertura}
-            onChange={(e) => setMontoApertura(e.target.value)}
-            disabled={isSubmitting}
-          />
-        </div>
-        <button onClick={handleAbrirCaja} disabled={isSubmitting} className={styles['boton-accion']}>
-          {isSubmitting ? 'Abriendo...' : 'Abrir Caja'}
-        </button>
-      </div>
-    );
-  } else if (cajaAbierta && arqueoActivo && !arqueoActivo.fecha_hora_cierre) {
-    // Mostrar formulario de Cierre
-    contenidoPrincipal = (
-      <div className={styles['seccion-formulario']}>
-        <h2>Caja Abierta</h2>
-        <p><strong>Caja Abierta el:</strong> {formatDateTime(arqueoActivo?.fecha_hora_apertura)}</p>
-        <p><strong>Monto Inicial:</strong> ${parseFloat(arqueoActivo?.monto_inicial || 0).toFixed(2)}</p>
-        
-        {/* Desglose de billetes - si lo usabas */}
-        <div className={styles['billetes-container']}>
-          <h3>Detalle de Efectivo Contado:</h3>
-          <div className={styles['billetes-grid']}>
-            {Object.keys(denominaciones).map(key => (
-              <div key={key} className={styles['billete-item']}>
-                <label htmlFor={key}>{key.replace('b', '$').replace('m', '¢')}:</label>
-                <input
-                  type="number" id={key} name={key}
-                  value={denominaciones[key]}
-                  onChange={handleDenominacionChange}
-                  min="0" step="1"
-                />
-              </div>
-            ))}
-          </div>
-          <p className={styles['total-contado-billetes']}>Total Contado: ${totalContadoBilletes.toFixed(2)}</p>
-        </div>
-
-        {/* Montos de cierre */}
-        <div className={styles['input-group']} style={{display: 'none'}}> {/* Oculto ya que se llena con el desglose */}
-          <label htmlFor="montoCierreEfectivo">Efectivo real en caja:</label>
-          <input id="montoCierreEfectivo" type="number" value={montoCierreEfectivo} readOnly />
-        </div>
-        <div className={styles['input-group']}>
-          <label htmlFor="montoCierreTarjeta">Total Tarjeta real:</label>
-          <input id="montoCierreTarjeta" type="number" placeholder="Total Tarjeta" value={montoCierreTarjeta} onChange={(e) => setMontoCierreTarjeta(e.target.value)} disabled={isSubmitting} />
-        </div>
-        <div className={styles['input-group']}>
-          <label htmlFor="montoCierreTransferencia">Total Transferencia real:</label>
-          <input id="montoCierreTransferencia" type="number" placeholder="Total Transferencia" value={montoCierreTransferencia} onChange={(e) => setMontoCierreTransferencia(e.target.value)} disabled={isSubmitting} />
-        </div>
-        <div className={styles['input-group']}>
-          <label htmlFor="notasCierre">Notas de cierre (opcional):</label>
-          <textarea id="notasCierre" value={notasCierre} onChange={(e) => setNotasCierre(e.target.value)} disabled={isSubmitting} rows="3"></textarea>
-        </div>
-        <button onClick={handleCerrarCaja} disabled={isSubmitting} className={`${styles['boton-accion']} ${styles['boton-cierre']}`}>
-          {isSubmitting ? 'Cerrando...' : 'Cerrar Caja'}
-        </button>
-      </div>
-    );
-  } else if (arqueoActivo && arqueoActivo.fecha_hora_cierre) {
-    // Mostrar Resumen del Arqueo Cerrado
-    contenidoPrincipal = (
-      <div className={`${styles['seccion-resultado']} ${styles['resultado-arqueo-detalles']}`}>
-        <h2>Resultado del Arqueo ID: {arqueoActivo.arqueo_id}</h2>
-        <p>
-            <strong>Apertura:</strong>
-            <span className={styles['valor-numerico']}>{formatDateTime(arqueoActivo.fecha_hora_apertura)}</span>
-        </p>
-        <p>
-            <strong>Cierre:</strong>
-            <span className={styles['valor-numerico']}>{formatDateTime(arqueoActivo.fecha_hora_cierre)}</span>
-        </p>
-        <p>
-            <strong>Monto Inicial:</strong>
-            <span className={styles['valor-numerico']}>${parseFloat(arqueoActivo.monto_inicial || 0).toFixed(2)}</span>
-        </p>
-        <p>
-            <strong>Ventas Efectivo (Calculado):</strong>
-            <span className={styles['valor-numerico']}>${parseFloat(arqueoActivo.ventas_efectivo_calculado || 0).toFixed(2)}</span>
-        </p>
-        <p>
-            <strong>Ventas Tarjeta (Calculado):</strong>
-            <span className={styles['valor-numerico']}>${parseFloat(arqueoActivo.ventas_tarjeta_calculado || 0).toFixed(2)}</span>
-        </p>
-        <p>
-            <strong>Ventas Transferencia (Calculado):</strong>
-            <span className={styles['valor-numerico']}>${parseFloat(arqueoActivo.ventas_transferencia_calculado || 0).toFixed(2)}</span>
-        </p>
-        <p>
-            <strong>Gastos (Calculado):</strong>
-            <span className={styles['valor-numerico']}>-${parseFloat(arqueoActivo.gastos_calculado || 0).toFixed(2)}</span>
-        </p>
-        <hr style={{margin: '15px 0', borderStyle: 'dashed'}}/>
-        <p>
-            <strong>Monto Final Esperado (Efectivo):</strong>
-            <span className={styles['valor-numerico']}>${parseFloat(arqueoActivo.monto_final_esperado_efectivo || 0).toFixed(2)}</span>
-        </p>
-        <p>
-            <strong>Monto Cierre Efectivo (Real):</strong>
-            <span className={styles['valor-numerico']}>${parseFloat(arqueoActivo.monto_cierre_efectivo_real || 0).toFixed(2)}</span>
-        </p>
-        <p>
-            <strong>Diferencia Efectivo:</strong>
-            <span className={`${styles['valor-numerico']} ${parseFloat(arqueoActivo.diferencia_efectivo || 0) < 0 ? styles['valor-negativo'] : styles['valor-positivo']}`}>
-            ${parseFloat(arqueoActivo.diferencia_efectivo || 0).toFixed(2)}
-            </span>
-        </p>
-        <hr style={{margin: '15px 0', borderStyle: 'dashed'}}/>
-        <p>
-            <strong>Monto Cierre Tarjeta (Real):</strong>
-            <span className={styles['valor-numerico']}>${parseFloat(arqueoActivo.monto_cierre_tarjeta_real || 0).toFixed(2)}</span>
-        </p>
-        <p>
-            <strong>Diferencia Tarjeta:</strong>
-            <span className={`${styles['valor-numerico']} ${parseFloat(arqueoActivo.diferencia_tarjeta || 0) < 0 ? styles['valor-negativo'] : styles['valor-positivo']}`}>
-            ${parseFloat(arqueoActivo.diferencia_tarjeta || 0).toFixed(2)}
-            </span>
-        </p>
-        <hr style={{margin: '15px 0', borderStyle: 'dashed'}}/>
-        <p>
-            <strong>Monto Cierre Transferencia (Real):</strong>
-            <span className={styles['valor-numerico']}>${parseFloat(arqueoActivo.monto_cierre_transferencia_real || 0).toFixed(2)}</span>
-        </p>
-        <p>
-            <strong>Diferencia Transferencia:</strong>
-            <span className={`${styles['valor-numerico']} ${parseFloat(arqueoActivo.diferencia_transferencia || 0) < 0 ? styles['valor-negativo'] : styles['valor-positivo']}`}>
-            ${parseFloat(arqueoActivo.diferencia_transferencia || 0).toFixed(2)}
-            </span>
-        </p>
-        {arqueoActivo.notas_cierre && (
-          <p>
-            <strong>Notas:</strong>
-            <span className={styles['valor-numerico']}>{arqueoActivo.notas_cierre}</span>
-          </p>
-        )}
-        <button onClick={reiniciarParaNuevaCaja} className={`${styles['boton-accion']} ${styles['boton-reiniciar']}`}>
-            Abrir Nueva Caja
-        </button>
-      </div>
-    );
-  }
-
-
-  return (
-    <div className={styles['arqueo-container']}>
-      <h1>Arqueo de Caja</h1>
-      {error && <p className={styles['error-message']}>{error}</p>}
-
-      {contenidoPrincipal}
-
-      <div className={styles['seccion-historial-contenedor']}>
-        <h2>Historial de Arqueos Cerrados</h2>
-        {historial.length === 0 && !loading && <p>No hay arqueos cerrados.</p>}
-        {historial.map((a) => (
-          <div key={a.arqueo_id} className={styles['registro-arqueo-card']}>
-            <div className={styles['registro-header']}>
-              <span className={styles['registro-id']}>ID Arqueo: {a.arqueo_id}</span>
-              <div className={styles['registro-fechas']}>
-                <span>Apertura: {formatDateTime(a.fecha_hora_apertura)}</span>
-                <span>Cierre: {formatDateTime(a.fecha_hora_cierre)}</span>
-              </div>
-            </div>
-            <div className={styles['registro-body']}>
-              <div className={styles['registro-linea']}>
-                <span className={styles['registro-label']}>M. Inicial:</span>
-                <span className={styles['registro-valor']}>${parseFloat(a.monto_inicial || 0).toFixed(2)}</span>
-              </div>
-              <div className={styles['registro-linea']}>
-                <span className={styles['registro-label']}>V. Efectivo (Sistema):</span>
-                <span className={styles['registro-valor']}>${parseFloat(a.ventas_efectivo_calculado || 0).toFixed(2)}</span>
-              </div>
-              <div className={styles['registro-linea']}>
-                <span className={styles['registro-label']}>Efectivo Real:</span>
-                <span className={styles['registro-valor']}>${parseFloat(a.monto_cierre_efectivo_real || 0).toFixed(2)}</span>
-              </div>
-              <div className={styles['registro-linea']}>
-                <span className={styles['registro-label']}>Dif. Efectivo:</span>
-                <span className={`${styles['registro-valor']} ${parseFloat(a.diferencia_efectivo || 0) < 0 ? styles['valor-negativo'] : styles['valor-positivo']}`}>
-                  ${parseFloat(a.diferencia_efectivo || 0).toFixed(2)}
-                </span>
-              </div>
-              <div className={styles['registro-linea']}>
-                <span className={styles['registro-label']}>V. Tarjeta (Sistema):</span>
-                <span className={styles['registro-valor']}>${parseFloat(a.ventas_tarjeta_calculado || 0).toFixed(2)}</span>
-              </div>
-              <div className={styles['registro-linea']}>
-                <span className={styles['registro-label']}>Tarjeta Real:</span>
-                <span className={styles['registro-valor']}>${parseFloat(a.monto_cierre_tarjeta_real || 0).toFixed(2)}</span>
-              </div>
-              <div className={styles['registro-linea']}>
-                <span className={styles['registro-label']}>Dif. Tarjeta:</span>
-                <span className={`${styles['registro-valor']} ${parseFloat(a.diferencia_tarjeta || 0) < 0 ? styles['valor-negativo'] : styles['valor-positivo']}`}>
-                  ${parseFloat(a.diferencia_tarjeta || 0).toFixed(2)}
-                </span>
-              </div>
-              <div className={styles['registro-linea']}>
-                <span className={styles['registro-label']}>V. Transferencia (Sistema):</span>
-                <span className={styles['registro-valor']}>${parseFloat(a.ventas_transferencia_calculado || 0).toFixed(2)}</span>
-              </div>
-              <div className={styles['registro-linea']}>
-                <span className={styles['registro-label']}>Transferencia Real:</span>
-                <span className={styles['registro-valor']}>${parseFloat(a.monto_cierre_transferencia_real || 0).toFixed(2)}</span>
-              </div>
-              <div className={styles['registro-linea']}>
-                <span className={styles['registro-label']}>Dif. Transferencia:</span>
-                <span className={`${styles['registro-valor']} ${parseFloat(a.diferencia_transferencia || 0) < 0 ? styles['valor-negativo'] : styles['valor-positivo']}`}>
-                  ${parseFloat(a.diferencia_transferencia || 0).toFixed(2)}
-                </span>
-              </div>
-              <div className={styles['registro-linea']}>
-                <span className={styles['registro-label']}>Gastos (Sistema):</span>
-                <span className={styles['registro-valor']}>${parseFloat(a.gastos_calculado || 0).toFixed(2)}</span>
-              </div>
-              {a.notas_cierre && (
-                <div className={styles['registro-notas']}>
-                  <span className={styles['registro-label']}>Notas:</span>
-                  <span className={styles['registro-valor']}>{a.notas_cierre}</span>
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
+const DetalleLinea = ({ label, valor }) => (
+    <div className={styles.detalleLinea}>
+        <span className={styles.detalleLabel}>{label}:</span>
+        <span className={styles.detalleValor}>${(parseFloat(valor) || 0).toFixed(2)}</span>
     </div>
-  );
+);
+
+
+const formatearFechaLocal = (fechaString) => {
+    if (!fechaString) {
+        return 'N/A';
+    }
+    const fecha = new Date(fechaString);
+    // Verificamos si la fecha es válida para evitar errores que rompan el renderizado
+    if (isNaN(fecha.getTime())) {
+        return 'Fecha inválida';
+    }
+    // Usamos toLocaleString pero forzando el formato de 24 horas (hour12: false)
+    return fecha.toLocaleString('es-AR', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+    });
+};
+
+const Arqueo = () => {
+    const [arqueoActivo, setArqueoActivo] = useState(null);
+    const [historial, setHistorial] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [montoApertura, setMontoApertura] = useState('');
+    const [montoCierreEfectivo, setMontoCierreEfectivo] = useState('');
+    const [notasCierre, setNotasCierre] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const fetchArqueoData = useCallback(async () => {
+        setLoading(true);
+        try {
+            const [resActivo, resHistorial] = await Promise.all([
+                fetch(`/api/arqueo/activo`, { cache: 'no-cache' }),
+                fetch(`/api/arqueo/historial`, { cache: 'no-cache' })
+            ]);
+            if (!resActivo.ok || !resHistorial.ok) {
+                throw new Error('Error al cargar los datos del arqueo.');
+            }
+            const activoData = await resActivo.json();
+            const historialData = await resHistorial.json();
+            setArqueoActivo(activoData);
+            setHistorial(historialData || []);
+            setError('');
+        } catch (err) {
+            setError(err.message);
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchArqueoData();
+    }, [fetchArqueoData]);
+
+    const handleAbrirCaja = async (e) => {
+        e.preventDefault();
+        if (!montoApertura || isNaN(parseFloat(montoApertura))) {
+            setError('Por favor, ingresa un monto inicial válido.');
+            return;
+        }
+        setIsSubmitting(true);
+        setError('');
+        try {
+            const response = await fetch('/api/arqueo/abrir', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ monto_inicial: parseFloat(montoApertura) }),
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Error al abrir la caja.');
+            setMontoApertura('');
+            await fetchArqueoData();
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleCerrarCaja = async (e) => {
+        e.preventDefault();
+        if (montoCierreEfectivo === '' || isNaN(parseFloat(montoCierreEfectivo))) {
+            setError('Por favor, ingresa el monto de cierre en efectivo.');
+            return;
+        }
+        setIsSubmitting(true);
+        setError('');
+        try {
+            const response = await fetch('/api/arqueo/cerrar', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    monto_cierre_efectivo_real: parseFloat(montoCierreEfectivo),
+                    notas: notasCierre // Se mantiene como 'notas' según tu código original
+                }),
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Error al cerrar la caja.');
+            setMontoCierreEfectivo('');
+            setNotasCierre('');
+            await fetchArqueoData();
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const renderAperturaCaja = () => (
+        <div className={styles['seccion-formulario']}>
+            <h2>Apertura de Caja</h2>
+            <form onSubmit={handleAbrirCaja}>
+                <div className={styles['input-group']}>
+                    <label htmlFor="montoApertura">Monto inicial en caja:</label>
+                    <input id="montoApertura" type="number" placeholder="Monto inicial" value={montoApertura} onChange={(e) => setMontoApertura(e.target.value)} disabled={isSubmitting} required />
+                </div>
+                <button type="submit" disabled={isSubmitting} className={styles['boton-accion']}>
+                    {isSubmitting ? 'Abriendo...' : 'Abrir Caja'}
+                </button>
+            </form>
+        </div>
+    );
+
+    const renderArqueoActivo = () => {
+        if (!arqueoActivo || !arqueoActivo.calculos) return null;
+
+        const { monto_inicial, calculos } = arqueoActivo;
+        const { 
+            ventas_efectivo_calculado, 
+            ventas_tarjeta_calculado, 
+            ventas_transferencia_calculado,
+            gastos_calculado,
+            movimientos_ingreso_calculado,
+            movimientos_egreso_calculado
+        } = calculos;
+
+        const totalEfectivoSistema = 
+            parseFloat(monto_inicial || 0) + 
+            parseFloat(ventas_efectivo_calculado || 0) +
+            parseFloat(movimientos_ingreso_calculado || 0) -
+            parseFloat(movimientos_egreso_calculado || 0) -
+            parseFloat(gastos_calculado || 0);
+
+        return (
+            <div className={styles.arqueoActivoContenedor}>
+                <h2>Arqueo de Caja Activo</h2>
+                <button onClick={fetchArqueoData} className={styles.botonRefrescar} disabled={loading}>
+                    {loading ? '...' : 'Refrescar Datos'}
+                </button>
+                <div className={styles.resumenActivo}>
+                    <DetalleLinea label="Monto Inicial" valor={monto_inicial} />
+                    <hr />
+                    <DetalleLinea label="(+) Ventas en Efectivo" valor={ventas_efectivo_calculado} />
+                    <DetalleLinea label="(+) Ingresos Manuales" valor={movimientos_ingreso_calculado} />
+                    <DetalleLinea label="(-) Egresos Manuales" valor={movimientos_egreso_calculado} />
+                    <DetalleLinea label="(-) Gastos Pagados" valor={gastos_calculado} />
+                    <hr />
+                    <DetalleLinea label="(=) Total Efectivo en Caja (Sistema)" valor={totalEfectivoSistema} />
+                    <hr />
+                    <DetalleLinea label="Total Ventas con Tarjeta" valor={ventas_tarjeta_calculado} />
+                    <DetalleLinea label="Total Ventas por Transferencia" valor={ventas_transferencia_calculado} />
+                </div>
+                <form onSubmit={handleCerrarCaja} className={styles['seccion-formulario']}>
+                    <h3>Cierre de Caja</h3>
+                    <div className={styles['input-group']}>
+                        <label htmlFor="montoCierreEfectivo">Monto final en efectivo (conteo real):</label>
+                        <input id="montoCierreEfectivo" type="number" placeholder="Monto final contado" value={montoCierreEfectivo} onChange={(e) => setMontoCierreEfectivo(e.target.value)} disabled={isSubmitting} required />
+                    </div>
+                    <div className={styles['input-group']}>
+                        <label htmlFor="notasCierre">Notas de cierre (opcional):</label>
+                        <textarea id="notasCierre" placeholder="Anotaciones relevantes..." value={notasCierre} onChange={(e) => setNotasCierre(e.target.value)} disabled={isSubmitting} />
+                    </div>
+                    <button type="submit" disabled={isSubmitting} className={`${styles['boton-accion']} ${styles.botonCerrar}`}>
+                        {isSubmitting ? 'Cerrando...' : 'Cerrar Caja y Generar Resumen'}
+                    </button>
+                </form>
+            </div>
+        );
+    };
+
+    const renderHistorial = () => {
+        if (!historial || historial.length === 0) {
+            return (
+                <div className={styles['seccion-historial-contenedor']}>
+                    <h2>Historial de Arqueos Cerrados</h2>
+                    <p>No hay arqueos cerrados para mostrar.</p>
+                </div>
+            )
+        }
+        return (
+            <div className={styles['seccion-historial-contenedor']}>
+                <h2>Historial de Arqueos Cerrados</h2>
+                {historial.map(arqueo => (
+                    <div key={arqueo.arqueo_id} className={styles['registro-arqueo-card']}>
+                        <div className={styles['registro-header']}>
+                            <span className={styles['registro-id']}>ID Arqueo: {arqueo.arqueo_id}</span>
+                            <div className={styles['registro-fechas']}>
+                                <span>Apertura: {formatearFechaLocal(arqueo.fecha_hora_apertura)}</span>
+                                <span>Cierre: {formatearFechaLocal(arqueo.fecha_hora_cierre)}</span>
+                            </div>
+                        </div>
+                        <div className={styles['registro-body']}>
+                            <div className={styles['registro-linea']}><span className={styles['registro-label']}>Monto Inicial:</span><span className={styles['registro-valor']}>${parseFloat(arqueo.monto_inicial || 0).toFixed(2)}</span></div>
+                            <hr />
+                            <div className={styles['registro-linea']}><span className={styles['registro-label']}>Total Efectivo (Sistema):</span><span className={styles['registro-valor']}>${parseFloat(arqueo.monto_final_esperado_efectivo || 0).toFixed(2)}</span></div>
+                            <div className={styles['registro-linea']}><span className={styles['registro-label']}>Total Efectivo (Real):</span><span className={styles['registro-valor']}>${parseFloat(arqueo.monto_cierre_efectivo_real || 0).toFixed(2)}</span></div>
+                            <div className={styles['registro-linea']}>
+                                <span className={styles['registro-label']}>Diferencia Efectivo:</span>
+                                <span className={`${styles['registro-valor']} ${parseFloat(arqueo.diferencia_efectivo) >= 0 ? styles['valor-positivo'] : styles['valor-negativo']}`}>
+                                    ${parseFloat(arqueo.diferencia_efectivo || 0).toFixed(2)}
+                                </span>
+                            </div>
+                            <hr />
+                            <div className={styles['registro-linea']}><span className={styles['registro-label']}>Ventas con Tarjeta:</span><span className={styles['registro-valor']}>${parseFloat(arqueo.ventas_tarjeta_calculado || 0).toFixed(2)}</span></div>
+                            <div className={styles['registro-linea']}><span className={styles['registro-label']}>Ventas por Transferencia:</span><span className={styles['registro-valor']}>${parseFloat(arqueo.ventas_transferencia_calculado || 0).toFixed(2)}</span></div>
+                            <div className={styles['registro-linea']}><span className={styles['registro-label']}>Total Gastos:</span><span className={styles['registro-valor']}>${parseFloat(arqueo.gastos_calculado || 0).toFixed(2)}</span></div>
+                            {arqueo.notas_cierre && (
+                                <div className={styles['registro-notas']}>
+                                    <span className={styles['registro-label']}>Notas:</span>
+                                    <span className={styles['registro-valor']}>{arqueo.notas_cierre}</span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        );
+    };
+
+    if (loading) {
+        return <div className={styles.contenedor}>Cargando...</div>;
+    }
+
+    return (
+        <div className={styles.contenedor}>
+            <h1>Gestión de Arqueo de Caja</h1>
+            {error && <p className={styles.errorMensaje}>{error}</p>}
+            {arqueoActivo ? renderArqueoActivo() : renderAperturaCaja()}
+            <hr className={styles.separador} />
+            {renderHistorial()}
+        </div>
+    );
 };
 
 export default Arqueo;

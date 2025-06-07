@@ -18,7 +18,9 @@ const dbConfig = {
         encrypt: process.env.DB_ENCRYPT ? process.env.DB_ENCRYPT === 'true' : true, // Default true for security (Azure)
         trustServerCertificate: process.env.DB_TRUST_CERT
             ? process.env.DB_TRUST_CERT === 'true'
-            : process.env.NODE_ENV === 'development' 
+            : process.env.NODE_ENV === 'development',
+        useUTC: false,
+         
     }
 };
 

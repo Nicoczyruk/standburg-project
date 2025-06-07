@@ -93,7 +93,7 @@ const createPagoTransaction = async ({ pedido_id, turno_id, metodo_pago, monto }
 
         // 4. Insertar el pago
         const pagoInsertResult = await db.query(
-            `INSERT INTO PAGOS (pedido_id, turno_id, metodo_pago, monto, fecha_hora)
+            `INSERT INTO PAGOS (pedido_id, turno_id, metodo_pago, monto, fecha_pago)
              OUTPUT INSERTED.*
              VALUES (@pedido_id, @turno_id, @metodo_pago, @monto, GETDATE());`,
             {

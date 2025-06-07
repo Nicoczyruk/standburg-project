@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import styles from './PedidosConfirmados.module.css';
+import { format } from 'date-fns';
 
 const ESTADO_EN_PREPARACION = 'en preparacion';
 const ESTADO_ENTREGADO = 'entregado';
@@ -100,6 +101,27 @@ const PedidosConfirmados = () => {
     setFiltroActual(nuevoFiltro);
   };
 
+const formatearFechaComoTexto = (fechaString) => {
+    if (!fechaString || typeof fechaString !== 'string') {
+      return 'Fecha no disponible';
+    }
+    // Suponemos que la fecha llega como "YYYY-MM-DDTHH:mm:ss.sssZ"
+    try {
+      const partes = fechaString.split('T');
+      const fecha = partes[0]; // "YYYY-MM-DD"
+      const hora = partes[1].slice(0, 5); // "HH:mm"
+
+      const [año, mes, dia] = fecha.split('-');
+
+      // Re-ordenamos al formato deseado
+      return `${dia}/${mes}/${año} ${hora} hs`;
+    } catch (e) {
+      // Si el formato es inesperado, devolvemos el string original para no romper la app
+      return fechaString; 
+    }
+  };
+
+
   // Se usan las clases del CSS module para mensajes
   if (loading) return <div className={styles['loading-message']}>Cargando pedidos...</div>;
   if (error && pedidos.length === 0) return <div className={styles['error-message']}>Error al cargar pedidos: {error}</div>;
@@ -144,7 +166,7 @@ const PedidosConfirmados = () => {
             {/* Contenedor para información del pedido para aplicar estilos flex */}
             <div className={styles['info-pedido']}>
               {pedido.cliente_nombre && <p><strong>Cliente:</strong> {pedido.cliente_nombre}</p>}
-              <p><strong>Fecha:</strong> {new Date(pedido.fecha).toLocaleString()}</p>
+              <p><strong>Fecha:</strong> {formatearFechaComoTexto(pedido.fecha)}</p>
               <p>
                 <strong>Estado:</strong>
                 {/* El span recibe la clase base 'estado-pedido' y la clase de color específica */}
