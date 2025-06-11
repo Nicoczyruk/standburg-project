@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import styles from './ConfirmarPedidosClientes.module.css'; // Importa el CSS Module
+import styles from './ConfirmarPedidosClientes.module.css'; // Importa el CSS Module+
+import { FaTrashAlt } from 'react-icons/fa';
+
 
 const ConfirmarPedidosClientes = () => {
   const [pedidosPorConfirmar, setPedidosPorConfirmar] = useState([]);
@@ -82,6 +84,29 @@ const ConfirmarPedidosClientes = () => {
     }
   };
 
+  const eliminarEstePedido = async (pedidoId) => {
+    // Confirmación antes de eliminar
+    if (!window.confirm(`¿Estás seguro de que quieres eliminar el Pedido #${pedidoId}? Esta acción no se puede deshacer.`)) {
+      return;
+    }
+
+    setUpdatingId(pedidoId); // Usamos el mismo estado para mostrar un feedback visual
+    try {
+      const response = await fetch(`/api/pedidos/${pedidoId}`, {
+        method: 'DELETE',
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Error al eliminar');
+      
+      toast.success(data.message);
+      fetchPedidosAConfirmar(); // Recargar la lista de pedidos
+    } catch (err) {
+      toast.error(err.message || 'No se pudo eliminar el pedido.');
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
   if (loading) return <div className={styles['confirmar-pedidos-container']}><p className={styles['loading-message']}>Cargando pedidos por confirmar...</p></div>;
   if (error && pedidosPorConfirmar.length === 0 && !loading) return <div className={styles['confirmar-pedidos-container']}><p className={styles['error-message']}>Error al cargar pedidos: {error}</p></div>;
 
@@ -98,6 +123,9 @@ const ConfirmarPedidosClientes = () => {
           
           <div key={pedido.pedido_id} className={styles['pedido-card-confirmar']}>
             <h2>Pedido ID: {pedido.pedido_id}</h2>
+            <button onClick={() => eliminarEstePedido(pedido.pedido_id)} className={styles.deleteButton}>
+              <FaTrashAlt />
+            </button>
             <div className={styles['info-pedido']}>
               <p><strong>Cliente:</strong> {pedido.cliente_nombre || 'N/A'}</p>
               <p><strong>Teléfono:</strong> {pedido.cliente_telefono || 'N/A'}</p>

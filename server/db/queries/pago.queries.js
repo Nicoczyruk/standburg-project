@@ -184,6 +184,8 @@ const deletePagoTransaction = async (id) => {
 };
 
 
+
+
 module.exports = {
     getAllPagos,
     getPagoById,

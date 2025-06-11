@@ -265,6 +265,29 @@ const getPedidosParaGestionConDetalles = async (estado) => {
 };
 
 
+/**
+ * Elimina un pedido y todos sus datos asociados (pagos y detalles) dentro de una transacción.
+ * @param {number} pedidoId - El ID del pedido a eliminar.
+ * @param {object} transaction - El objeto de transacción de la base de datos.
+ */
+const eliminarPedidoCompleto = async (pedidoId, transaction) => {
+    // 1. Eliminar pagos asociados (si existen).
+    await transaction.request()
+        .input('pedido_id', sql.Int, pedidoId)
+        .query('DELETE FROM PAGOS WHERE pedido_id = @pedido_id');
+
+    // 2. Eliminar los detalles del pedido.
+    await transaction.request()
+        .input('pedido_id', sql.Int, pedidoId)
+        .query('DELETE FROM DETALLE_PEDIDO WHERE pedido_id = @pedido_id');
+
+    // 3. Finalmente, eliminar el pedido maestro.
+    await transaction.request()
+        .input('pedido_id', sql.Int, pedidoId)
+        .query('DELETE FROM PEDIDOS WHERE pedido_id = @pedido_id');
+};
+
+
 module.exports = {
     getAllPedidos,
     getPedidoById,
@@ -272,5 +295,5 @@ module.exports = {
     createPedidoConPagoTransaction,
     getPedidosParaGestionConDetalles,
     METODOS_PAGO_VALIDOS,
-    
+    eliminarPedidoCompleto,
 };

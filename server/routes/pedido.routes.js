@@ -23,6 +23,8 @@ router.post('/', /* authMiddleware.isLoggedIn, */ pedidoController.crearPedido);
 
 router.put('/:id/estado', /* authMiddleware.isLoggedIn, */ pedidoController.actualizarEstadoPedido);
 
+// DELETE /api/pedidos/:id -> Eliminar un pedido
 
+router.delete('/:id', /* authMiddleware.isLoggedIn, */ pedidoController.eliminarPedido);
 
 module.exports = router;

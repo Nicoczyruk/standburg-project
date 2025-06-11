@@ -1,5 +1,6 @@
 // server/controllers/pedido.controller.js
 const pedidoQueries = require('../db/queries/pedido.queries');
+const { getTransaction } = require('../db/connection');
 // Importar los métodos de pago válidos del módulo de queries de pago
 const { METODOS_PAGO_VALIDOS } = require('../db/queries/pago.queries');
 
@@ -186,10 +187,35 @@ const obtenerPedidosParaGestion = async (req, res, next) => {
     }
 };
 
+const eliminarPedido = async (req, res, next) => {
+    const { id } = req.params;
+    const pedidoIdInt = parseInt(id, 10);
+
+    let transaction;
+    try {
+        // 1. Obtener la transacción 
+        transaction = await getTransaction();
+        
+        // 2. Llamar a la función que ejecuta la consulta
+        await pedidoQueries.eliminarPedidoCompleto(pedidoIdInt, transaction);
+
+        // 3. Si todo va bien, confirmar los cambios.
+        await transaction.commit();
+
+        res.status(200).json({ message: `Pedido #${pedidoIdInt} y todos sus datos asociados han sido eliminados.` });
+
+    } catch (error) {
+        // 4. Si algo falla, revertir todo.
+        if (transaction) await transaction.rollback();
+        next(error); 
+    }
+};
+
 module.exports = {
     obtenerTodosLosPedidos,
     obtenerPedidoPorId,
     crearPedido, 
     actualizarEstadoPedido,
     obtenerPedidosParaGestion,
+    eliminarPedido,
 };

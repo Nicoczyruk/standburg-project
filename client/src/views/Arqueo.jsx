@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import styles from './Arqueo.module.css';
+import { FaSyncAlt } from 'react-icons/fa';
 
 const DetalleLinea = ({ label, valor }) => (
     <div className={styles.detalleLinea}>
@@ -157,10 +158,12 @@ const Arqueo = () => {
 
         return (
             <div className={styles.arqueoActivoContenedor}>
-                <h2>Arqueo de Caja Activo</h2>
-                <button onClick={fetchArqueoData} className={styles.botonRefrescar} disabled={loading}>
-                    {loading ? '...' : 'Refrescar Datos'}
-                </button>
+                <div className={styles.arqueoHeader}>
+                    <h2>Arqueo de Caja Activo</h2>
+                    <button onClick={fetchArqueoData} className={styles.botonRefrescar} disabled={loading}>
+                        <FaSyncAlt />
+                    </button>
+                </div>
                 <div className={styles.resumenActivo}>
                     <DetalleLinea label="Monto Inicial" valor={monto_inicial} />
                     <hr />
