@@ -75,3 +75,14 @@
     font-size: 12px;
   }
 }
+
+.logout-card {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  color: white; /* O el color que usen los otros íconos/texto */
+}
+
+.logout-card:hover {
+  background-color: #d9534f; /* Un color rojo para indicar una acción destructiva */
+}

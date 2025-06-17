@@ -1,13 +1,26 @@
 import React from 'react';
 import { Link } from 'react-router-dom'; // Importar Link
+import { useNavigate } from 'react-router-dom';
 import './Header.css';
 import {
   FaHamburger, FaClipboardList, FaCheckCircle, FaUserFriends,
-  FaCashRegister, FaExchangeAlt, FaMoneyBillAlt, FaBox
+  FaCashRegister, FaExchangeAlt, FaMoneyBillAlt, FaBox, FaSignOutAlt
 } from 'react-icons/fa';
 
 
 const Header = () => {
+
+
+  const handleLogout = (event) => {
+    event.preventDefault();
+
+    // 1. Usa la clave correcta para borrar el token
+    localStorage.removeItem('adminToken');
+
+    // 2. Redirige y recarga la aplicación a la página de login.
+    // Esto asegura que el estado de autenticación en App.jsx se reinicie.
+    window.location.href = '/login';
+};
   return (
     <header className="main-header">
       <div className="logo">
@@ -41,6 +54,9 @@ const Header = () => {
         <Link to="/admin/productos" className="card">
           <FaBox className="icon" /><span>Productos</span>
         </Link>
+        <button onClick={handleLogout} className="card logout-card">
+          <FaSignOutAlt className="icon" /><span>Cerrar Sesión</span>
+        </button>
       </nav>
     </header>
   );
