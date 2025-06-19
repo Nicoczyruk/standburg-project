@@ -286,8 +286,26 @@ return (
 
         <form className="formulario-pedido" onSubmit={handleSubmitPedido}>
           <input name="nombre" placeholder="Nombre Completo*" value={formCliente.nombre} onChange={handleChangeFormCliente} required disabled={isSubmitting} />
-          <input name="telefono" type="tel" placeholder="Teléfono" value={formCliente.telefono} onChange={handleChangeFormCliente} disabled={isSubmitting} />
-
+<input
+  name="telefono"
+  type="tel"
+  placeholder="Teléfono"
+  value={formCliente.telefono}
+  onChange={(e) => {
+    const soloNumeros = e.target.value.replace(/\D/g, ''); // Elimina todo lo que no sea dígito
+    if (soloNumeros.length <= 13) {
+      handleChangeFormCliente({
+        target: {
+          name: 'telefono',
+          value: soloNumeros,
+        },
+      });
+    }
+  }}
+  disabled={isSubmitting}
+  minLength={10}
+  maxLength={13}
+/>
           {tipoPedido === 'delivery' && (
             <input name="direccion" placeholder="Dirección Completa*" value={formCliente.direccion} onChange={handleChangeFormCliente} required disabled={isSubmitting} />
           )}
