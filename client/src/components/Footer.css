@@ -8,3 +8,26 @@
     font-family: sans-serif;
   }
   
+  .footer {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 1rem !important;
+  background-color: #222 !important;
+  color: #fff !important;
+  font-size: 0.9rem !important;
+  flex-wrap: wrap !important;
+}
+
+.footer a {
+  color: #fff !important;
+  text-decoration: none !important;
+}
+
+.footer a:hover {
+  text-decoration: underline !important;
+}
+
+.footer-left, .footer-right {
+  margin: 0.5rem 0 !important;
+}
