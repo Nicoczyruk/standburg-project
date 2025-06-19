@@ -13,7 +13,6 @@
 
 /* Encabezado */
 .pedido-cliente-header {
-
   background-color: #b91c1c;
   color: white;
   padding: 1rem 1.5rem;
@@ -23,12 +22,6 @@
   border-radius: 12px 12px 0 0;
   flex-wrap: wrap;
   gap: 1rem;
-}
-
-.pedido-cliente-header::before {
-  content: '' !important;
-  position: absolute !important;
-  background: rgba(0, 0, 0, 0.5) !important;
 }
 
 .pedido-cliente-header h1 {
@@ -82,8 +75,6 @@
   border-radius: 20px;
   transition: left 0.3s ease;
   z-index: 2;
-  outline: none;
-  -webkit-tap-highlight-color: transparent;
 }
 
 .tipo-pedido input[type="checkbox"]:checked + .switch {
@@ -103,14 +94,6 @@
 .tipo-pedido input[type="checkbox"]:not(:checked) + .switch .switch-label::before {
   content: attr(data-off);
   color: #111827;
-}
-
-.pedido-cliente-container{
-  background-image: url(/FondoPantalla5.png) !important;
-  background-size: cover !important;
-  background-position: center !important;
-  background-attachment: fixed !important;
-  border-radius: 12px 12px 12px 12px;
 }
 
 /* Grid principal */
@@ -282,7 +265,6 @@
 
 /* Carrito */
 .carrito {
-  margin-top: 15px !important;
   padding: 1.5rem !important;
   background-color: #f9fafb !important;
   border-radius: 16px !important;
@@ -599,9 +581,4 @@
     background-color: #ffe5e5;
     border-color: #991b1b;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-button {
-  outline: none;
-  -webkit-tap-highlight-color: transparent;
 }
