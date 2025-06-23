@@ -1,33 +1,72 @@
+/* Contenedor principal que ocupa toda la pantalla y tiene la imagen de fondo */
 .login-container {
-  max-width: 400px;
-  margin: 100px auto;
-  padding: 2rem;
-  background: #f8f9fa;
-  border-radius: 10px;
-  text-align: center;
-  box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100%;
+    /* Ruta a tu imagen en la carpeta public */
+    background-image: url('/FondoPantalla5.png');
+    background-size: cover; /* La imagen cubre todo el contenedor */
+    background-position: center; /* Se centra la imagen */
+    background-repeat: no-repeat; /* La imagen no se repite */
 }
 
-.login-form input {
-  width: 100%;
-  padding: 10px;
-  margin: 10px 0;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+/* Estilos para el formulario de login */
+.login-form {
+    max-width: 400px;
+    padding: 2rem;
+    background: rgba(248, 249, 250, 0.95); /* Fondo casi opaco para máxima legibilidad */
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0px 0px 15px rgba(0,0,0,0.2);
 }
 
-.login-form button {
-  width: 100%;
-  padding: 10px;
-  background-color: #007bff;
-  border: none;
-  color: white;
-  font-weight: bold;
-  border-radius: 5px;
-  cursor: pointer;
+/* NUEVO: Estilo para el título "Login de Administrador" */
+.login-form h2 {
+    color: #333333; /* Color oscuro para el texto del título para asegurar la visibilidad */
+    margin-bottom: 1.5rem;
 }
 
+/* Estilo para el logo dentro del formulario */
 .logo {
-  width: 100px;
-  margin-bottom: 20px;
+    width: 100px;
+    margin-bottom: 20px;
+}
+
+/* Estilos para los inputs del formulario */
+.login-form input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease; /* Transición para efecto de foco */
+}
+
+/* Estilo para el input cuando está seleccionado (en foco), ahora en tonos rojos */
+.login-form input:focus {
+    border-color: #D32F2F; /* Color rojo oscuro para el borde */
+    box-shadow: 0 0 5px rgba(211, 47, 47, 0.5); /* Sombra roja sutil */
+    outline: none; /* Quitar el borde por defecto del navegador */
+}
+
+/* Estilos para el botón del formulario, ahora con tonos rojos y borde blanco */
+.login-form button {
+    width: 100%;
+    padding: 10px;
+    background-color: #D32F2F; /* Rojo oscuro e intenso */
+    border: 2px solid white; /* Borde blanco para que resalte */
+    color: white;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+/* Efecto hover para el botón */
+.login-form button:hover {
+    background-color: #B71C1C; /* Un rojo aún más oscuro para el hover */
+    transform: scale(1.02); /* Ligero zoom al pasar el mouse */
 }

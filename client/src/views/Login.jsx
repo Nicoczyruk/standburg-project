@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-// import './login.css'; // Tus estilos
+import './login.css'; // 1. Asegúrate que esta línea esté importando tu CSS
 
 // Recibe setAdminAuthenticated como prop
 const Login = ({ setAdminAuthenticated }) => {
@@ -16,8 +16,8 @@ const Login = ({ setAdminAuthenticated }) => {
     setIsLoading(true);
 
     try {
-      // Ajusta la URL a tu endpoint de backend real
-      const response = await fetch('/api/auth/login', { // Asegúrate que esta sea la ruta correcta de tu API
+      
+      const response = await fetch('/api/auth/login', { 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
@@ -41,38 +41,43 @@ const Login = ({ setAdminAuthenticated }) => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '80vh' }}>
-      <h2>Login de Administrador</h2>
-      <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '300px' }}>
-        <div>
-          <label htmlFor="username">Usuario:</label>
-          <input
-            type="text"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-            disabled={isLoading}
-            style={{ width: '100%', padding: '8px' }}
-          />
+    
+    <div className="login-container">
+        
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
+          <h2>Login de Administrador</h2>
+          
+          <form onSubmit={handleLogin} className="login-form" style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '300px' }}>
+            <div>
+              <label htmlFor="username">Usuario:</label>
+              <input
+                type="text"
+                id="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                disabled={isLoading}
+                style={{ width: '100%', padding: '8px' }}
+              />
+            </div>
+            <div>
+              <label htmlFor="password">Contraseña:</label>
+              <input
+                type="password"
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                disabled={isLoading}
+                style={{ width: '100%', padding: '8px' }}
+              />
+            </div>
+            {error && <p style={{ color: 'red' }}>{error}</p>}
+            <button type="submit" style={{ padding: '10px', cursor: 'pointer' }} disabled={isLoading}>
+              {isLoading ? 'Ingresando...' : 'Ingresar'}
+            </button>
+          </form>
         </div>
-        <div>
-          <label htmlFor="password">Contraseña:</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            disabled={isLoading}
-            style={{ width: '100%', padding: '8px' }}
-          />
-        </div>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        <button type="submit" style={{ padding: '10px', cursor: 'pointer' }} disabled={isLoading}>
-          {isLoading ? 'Ingresando...' : 'Ingresar'}
-        </button>
-      </form>
     </div>
   );
 };
