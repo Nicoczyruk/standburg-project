@@ -13,7 +13,7 @@ const Footer = () => {
         </a>
       </div>
       <div className="footer-left">
-        <a href="/avisos-legales">Desarrollado por Grupo 6
+        <a href="https://github.com/Nicoczyruk/standburg-project" target="_blank" rel="noopener noreferrer">Desarrollado por Grupo 6
         <FaPalette style={{ marginRight: '0.5rem' }} />
         </a>
       </div>
